@@ -1,0 +1,35 @@
+from flask_sqlalchemy import SQLAlchemy
+from app import app
+from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from extensions import db
+from flask_login import UserMixin
+
+db = SQLAlchemy()
+db.init_app(app)
+
+class User(db.Model,UserMixin):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer,primary_key=True)
+    username = db.Column(db.String,nullable=False)
+    password = db.Column(db.String(255),nullable=False)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+
+class Product(db.Model):
+
+    id = db.Column(db.Integer,primary_key=True)
+    barcode = db.Column(db.String(255),unique=True,nullable=False)
+    data = db.Column(db.String(255), nullable=False)      # Encoded content
+    filename = db.Column(db.String(255), nullable=False)  # Stored image filename
+    desc = db.Column(db.String(100),defalult='')
+    stock = db.Column(db.Integer,default=0)
+    date_updated = db.Column(db.DateTime,default=datetime.now())
+
+    def __repr__(self):
+        return f"Generated QR Code {self.id} - {self.bar}"
