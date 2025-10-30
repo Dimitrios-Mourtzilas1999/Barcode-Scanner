@@ -22,9 +22,9 @@ class Product(db.Model):
     barcode = db.Column(db.String(255),unique=True,nullable=False)
     data = db.Column(db.String(255), nullable=False)      # Encoded content
     filename = db.Column(db.String(255), nullable=False)  # Stored image filename
-    desc = db.Column(db.String(100),defalult='')
+    desc = db.Column(db.String(100),server_default='')
     stock = db.Column(db.Integer,default=0)
-    date_updated = db.Column(db.DateTime,default=datetime.now())
+    date_updated = db.Column(db.DateTime,default=datetime.now)
 
     def __repr__(self):
         return f"Generated QR Code {self.id} - {self.bar}"
