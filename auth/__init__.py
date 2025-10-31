@@ -2,7 +2,7 @@
 from flask import Blueprint,url_for,redirect,render_template,flash
 from .forms import LoginForm
 from flask_login import login_user,login_required,logout_user
-from models import User
+from app.models import User
 
 authbp = Blueprint('auth',__name__,url_prefix='/auth')
 
