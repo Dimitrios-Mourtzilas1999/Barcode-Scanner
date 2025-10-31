@@ -1,7 +1,7 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from extensions import db
+from app.extensions import db
 
 class User(db.Model,UserMixin):
     __tablename__ = 'users'
@@ -24,7 +24,9 @@ class Product(db.Model):
     filename = db.Column(db.String(255), nullable=False)  # Stored image filename
     desc = db.Column(db.String(100),server_default='')
     stock = db.Column(db.Integer,default=0)
+    price = db.Column(db.Integer,default=.0)
     date_updated = db.Column(db.DateTime,default=datetime.now)
+    date_created = db.Column(db.DateTime,default=datetime.now)
 
     def __repr__(self):
         return f"Generated QR Code {self.id} - {self.bar}"
