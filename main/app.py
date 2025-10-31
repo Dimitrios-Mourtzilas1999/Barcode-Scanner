@@ -1,7 +1,5 @@
 from flask import render_template,redirect,url_for
 from . import create_app
-
-
 app = create_app()
 
 @app.route('/')
