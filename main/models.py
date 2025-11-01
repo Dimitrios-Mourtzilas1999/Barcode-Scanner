@@ -1,10 +1,12 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from main.extensions import db
+from extensions import db
 
 class User(db.Model,UserMixin):
     __tablename__ = 'users'
+    __table_args__ = {'extend_existing': True}
+
     id = db.Column(db.Integer,primary_key=True)
     username = db.Column(db.String,nullable=False)
     password = db.Column(db.String(255),nullable=False)
@@ -17,6 +19,9 @@ class User(db.Model,UserMixin):
 
 
 class Product(db.Model):
+
+    __tablename__ = "product"
+    __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer,primary_key=True)
     barcode = db.Column(db.String(255),unique=True,nullable=False)
