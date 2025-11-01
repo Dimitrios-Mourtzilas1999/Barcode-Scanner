@@ -4,7 +4,7 @@ from .forms import LoginForm
 from flask_login import login_user,login_required,logout_user
 from main.models import User
 
-authbp = Blueprint('auth',__name__,url_prefix='/auth',template_folder='templates')
+authbp = Blueprint('auth',__name__,url_prefix='/auth')
 
 @authbp.route('/login',methods=["GET","POST"])
 def login():
