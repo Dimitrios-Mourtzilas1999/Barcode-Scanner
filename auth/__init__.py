@@ -1,5 +1,6 @@
 
-from flask import Blueprint,url_for,redirect,render_template,flash
+from sqlalchemy import text
+from flask import Blueprint,url_for,redirect,render_template,flash,session
 from .forms import LoginForm
 from flask_login import login_user,login_required,logout_user
 from main.models import User
@@ -24,5 +25,7 @@ def login():
 @authbp.route('/logout',methods=["GET"])
 @login_required
 def logout():
+    
+    session.clear()
     logout_user()
     return redirect(url_for('auth.login'))
