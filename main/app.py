@@ -1,8 +1,8 @@
 from flask import render_template,redirect,url_for
 from flask import Flask
 from flask_migrate import Migrate
-from extensions import db, login_manager
-from models import User
+from .extensions import db, login_manager
+from .models import User
 import sys,os
 import pymysql
 

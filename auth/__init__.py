@@ -1,6 +1,6 @@
 
 from sqlalchemy import text
-from flask import Blueprint,url_for,redirect,render_template,flash,session
+from flask import Blueprint,url_for,redirect,render_template,flash
 from .forms import LoginForm
 from flask_login import login_user,login_required,logout_user
 from main.models import User
@@ -12,13 +12,17 @@ def login():
 
     lgForm = LoginForm()
     if lgForm.validate_on_submit():
-        user = User.query.filter(lgForm.username.data).first()
+        user = User.query.filter(User.username == text(lgForm.username.data)).first()
+        print(user)
+        print(len(user))
         if user and user.check_password(lgForm.password.data):
             login_user()
             return redirect(url_for('dashboard'))
         else:
-            flash('Τα στοιχεία χρήστη είναι λάθος')
-            return redirect('auth.login',form=lgForm)
+            flash('Τα στοιχεία χρήστη είναι λάθος','error')
+            return render_template('auth/login.html',form=lgForm)
+
+
     return render_template('auth/login.html',form=lgForm)
 
 
