@@ -2,7 +2,8 @@ from datetime import datetime
 from sqlalchemy import CheckConstraint, Enum
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from .extensions import db
+from extensions import db
+
 
 class User(db.Model,UserMixin):
     __tablename__ = 'users'
@@ -13,11 +14,6 @@ class User(db.Model,UserMixin):
     password = db.Column(db.String(255),nullable=False)
     role_id = db.Column(db.Integer,db.ForeignKey('roles.id'),nullable=True)
 
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-    
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
 
 
 class Product(db.Model):
@@ -49,4 +45,4 @@ class Roles(db.Model):
     )
     id = db.Column(db.Integer,primary_key=True)
     role = db.Column(Enum('admin', 'user', name='user_roles'), nullable=False)
-    user = db.relationship('User',backref='role',lazy=True)
+    user = db.relationship(User,backref='role',lazy=True)
