@@ -1,9 +1,9 @@
 
-from sqlalchemy import text
 from flask import Blueprint,url_for,redirect,render_template,flash
 from .forms import LoginForm
 from flask_login import login_user,login_required,logout_user
 from main.models import User
+from hashlib import sha256
 
 authbp = Blueprint('auth',__name__,url_prefix='/auth')
 
@@ -12,11 +12,13 @@ def login():
 
     lgForm = LoginForm()
     if lgForm.validate_on_submit():
-        user = User.query.filter(User.username == text(lgForm.username.data)).first()
-        print(user)
-        print(len(user))
-        if user and user.check_password(lgForm.password.data):
-            login_user()
+        username = lgForm.username.data
+        password= lgForm.password.data
+        hashed = sha256(password.encode()).hexdigest()
+        print(hashed)
+        user = User.query.filter(User.username == username).first()
+        if user and user.password == hashed:
+            login_user(user)
             return redirect(url_for('dashboard'))
         else:
             flash('Τα στοιχεία χρήστη είναι λάθος','error')
