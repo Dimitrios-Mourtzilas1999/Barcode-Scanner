@@ -31,5 +31,7 @@ def login():
 @authbp.route('/logout',methods=["GET"])
 @login_required
 def logout():
+    
+    session.clear()
     logout_user()
     return redirect(url_for('auth.login'))
