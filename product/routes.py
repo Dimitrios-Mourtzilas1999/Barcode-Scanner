@@ -1,9 +1,11 @@
 from . import productbp
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, request, flash, current_app
 from .forms import ProductRegistrationForm, ProductEditForm
 from extensions import db
 from models import Product
-from datetime import datetime
+from werkzeug.utils import secure_filename
+import os
+from utils.helper import allowed_file
 
 
 @productbp.route("/register", methods=["GET", "POST"])
@@ -18,15 +20,23 @@ def register_product():
         )
         if product:
             return redirect(url_for("dashboard", message="Το προϊόν υπαρχει ήδη"))
-        try:
-            db.session.add(product)
-            db.session.commit()
-            return redirect(url_for("dashboard"))
-        except Exception as e:
-            print(e)
-            db.session.rollback()
-        finally:
-            db.session.close()
+        else:
+            product = Product(
+                form.product_id.data,
+                form.product_name.data,
+                form.product_price.data,
+                form.product_quantity.data,
+                form.image.data,
+            )
+            try:
+                db.session.add(product)
+                db.session.commit()
+                return redirect(url_for("dashboard"))
+            except Exception as e:
+                print(e)
+                db.session.rollback()
+            finally:
+                db.session.close()
 
     return render_template("register_product.html", form=form)
 
@@ -38,3 +48,16 @@ def edit_product():
         data = form.data
         print(data)
     return render_template("edit_product.html", form=form)
+
+
+@productbp.route("/upload", methods=["GET", "POST"])
+def upload_file():
+    if request.method == "POST":
+        file = request.files["file"]
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            save_path = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
+            file.save(save_path)
+            flash("File uploaded successfully!")
+            return redirect(url_for("uploaded_file", filename=filename))
+    return render_template("upload.html")
