@@ -1,19 +1,45 @@
 {% extends "base.html" %}
 
 
+{%block css %}
+<link rel="stylesheet" href="{{url_for('static',filename='css/dashboard.css')}}">
+{%endblock%}
+
+
 
 {%block content%}
 
-<nav>
-    <div class="company-logo">
 
+{%include 'user-nav.html'%}
+
+{%if message %}
+<div class="message">
+
+</div>
+
+{%endif%}
+
+
+
+<div class="product-actions">
+    <button class="register-product">
+        <a href="{{url_for('product.register_product')}}">Εγγραφή Προϊόντος</a>
+    </button>
+</div>
+
+<div class="container">
+    {%for product in products%}
+    <div class="product">
+        <span class="product-desc">
+            {{product.desc}}
+        </span>
+        <img src="{{product.image}}" alt="Image">
+        <span class="product-barcode">
+            {{product.barcode}}
+        </span>
     </div>
-    <div class="user-info">
-
-    </div>
-</nav>
-
-{%include 'product_table.html'%}
+    {%endfor%}
+</div>
 
 {%include 'pagination.html'%}
 

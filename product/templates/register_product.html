@@ -1,0 +1,28 @@
+{%extends 'base.html' %}
+
+
+{%block css %}
+<link rel="stylesheet" href="{{url_for('static',filename='css/register_product.css')}}">
+{%endblock%}
+
+{%block content %}
+
+{%if form %}
+
+<form action="{{url_for('product.register_product')}}" method="POST" class="product-register-form">
+
+    {{form.hidden_tag()}}
+    {{form.product_id.label}}
+    {{form.product_id()}}
+    {{form.product_name.label}}
+    {{form.product_name()}}
+    {{form.product_price.label}}
+    {{form.product_price()}}
+    {{form.product_quantity.label}}
+    {{form.product_quantity()}}
+    {{form.submit()}}
+</form>
+
+{%endif%}
+
+{%endblock%}

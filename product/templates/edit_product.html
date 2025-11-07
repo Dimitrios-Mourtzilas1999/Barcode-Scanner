@@ -1,0 +1,25 @@
+{% extends "base.html"%}
+
+
+
+{%block content %}
+
+{%if form %}
+
+<form action="" method="post">
+    
+    {{form.hidden_tag()}}
+    {{form.product_id.label}}
+    {{form.product_id()}}
+    {{form.product_name.label}}
+    {{form.product_name()}}
+    {{form.product_price.label}}
+    {{form.product_price()}}
+    {{form.product_quantity.label}}
+    {{form.product_quantity()}}
+    {{form.submit()}}
+    
+</form>
+
+{%endif%}
+{%endblock%}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+
+{%block css %}
+<link rel="stylesheet" href="{{url_for('static',filename='css/dashboard.css')}}">
+{%endblock%}
+
+
+
+{%block content%}
+
+
+<nav>
+    <div class="company-logo">
+
+    </div>
+    <div class="user-info">
+
+    </div>
+</nav>
+
+<div class="product-actions">
+    <button class="register-product">
+        <a href="{{url_for('product.register_product')}}">Εγγραφή Προϊόντος</a>
+    </button>
+</div>
+
+<table class="table">
+    <thead class="table-header">
+        <td>ΚΩΔΙΚΟΣ ΠΡΟΪΟΝΤΟΣ</td>
+        <td>ΠΕΡΙΓΡΑΦΗ ΠΡΟΪΟΝΤΟΣ</td>
+        <td>ΑΠΟΘΕΜΑ</td>
+        <td>ΤΙΜΗ</td>
+        <td>ΕΝΗΜΕΡΩΘΗΚΕ</td>
+    </thead>
+    <tbody>
+        {%for product in products %}
+        <tr>
+            <td>
+                {{product.barcode}}
+            </td>
+            <td>
+                {{product.desc}}
+            </td>
+            <td>
+                {{product.stock}}
+            </td>
+            <td>
+                {{product.price}}
+            </td>
+            <td>
+                {{product.date_updated}}
+            </td>
+        </tr>
+
+            {%endfor%}
+    </tbody>
+</table>
+
+
+
+{%include 'pagination.html'%}
+
+{%include 'copyright.html'%}
+
+{%endblock%}
