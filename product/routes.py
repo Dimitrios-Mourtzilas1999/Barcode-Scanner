@@ -15,20 +15,15 @@ def register_product():
     if form.validate_on_submit():
         product = (
             db.session.query(Product)
-            .filter(Product.barcode == form.product_id.data)
+            .filter(Product.barcode == form.barcode.data)
             .first()
         )
         if product:
             return redirect(url_for("dashboard", message="Το προϊόν υπαρχει ήδη"))
         else:
-            product = Product(
-                form.product_id.data,
-                form.product_name.data,
-                form.product_price.data,
-                form.product_quantity.data,
-                form.image.data,
-            )
+            
             try:
+                product = Product(barcode=form.barcode.data,desc=form.desc.data,stock=form.stock.data,price=form.price.data,image_file=form.image.data)
                 db.session.add(product)
                 db.session.commit()
                 return redirect(url_for("dashboard"))

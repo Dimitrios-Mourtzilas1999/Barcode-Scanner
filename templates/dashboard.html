@@ -5,7 +5,9 @@
 <link rel="stylesheet" href="{{url_for('static',filename='css/dashboard.css')}}">
 {%endblock%}
 
-
+{%block js %}
+<script src="{{url_for('static',filename='js/dashboard.js')}}"></script>
+{%endblock%}
 
 {%block content%}
 
@@ -22,9 +24,8 @@
 
 
 <div class="product-actions">
-    <button class="btn">
-        <a href="{{url_for('product.register_product')}}">Εγγραφή Προϊόντος</a>
-    </button>
+    <a href="{{url_for('product.register_product')}}" class="btn">Εγγραφή Προϊόντος</a>
+
 </div>
 
 <div class="container">
@@ -33,7 +34,7 @@
         <span class="product-desc">
             {{product.desc}}
         </span>
-        <img src="{{product.image}}" alt="Image">
+        <img src="{{product.image_file}}" alt="Image">
         <span class="product-barcode">
             {{product.barcode}}
         </span>
