@@ -7,4 +7,5 @@ class RegisterCategoryForm(FlaskForm):
 
     category_type = StringField('Κατηγορία',validators=[DataRequired()])
     submit = SubmitField('Καταχώρηση')
+    
 

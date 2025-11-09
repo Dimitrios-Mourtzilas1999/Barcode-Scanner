@@ -26,9 +26,12 @@ def create_app():
     login_manager.login_view = "auth.login"
     from auth import authbp as auth_blueprint
     from product import productbp as product_blueprint
+    from category.routes import categorybp as category_blueprint
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(product_blueprint)
+    app.register_blueprint(category_blueprint)
+
 
     Migrate(app, db)
 

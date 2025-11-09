@@ -23,14 +23,15 @@
 
 
 
-<div class="product-actions">
-    <a href="{{url_for('product.register_product')}}" class="btn">Εγγραφή Προϊόντος</a>
-
+<div class="actions">
+    <a href="{{url_for('product.register_product')}}" class="btn">Νέο Προϊόν</a>
+    <a href="{{url_for('category.register_category')}}" class="btn">Νέα Κατηγορία</a>
+    <a href="" class="btn">Ανάθεση προϊόντος σε κατηγορία</a>
 </div>
 
 <div class="container">
     {%for product in products%}
-    <div class="product">
+    <div class="product" data-barcode="{{product.barocde}}">
         <span class="product-desc">
             {{product.desc}}
         </span>
