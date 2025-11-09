@@ -1,0 +1,16 @@
+{%extends "base.html"%}
+
+
+{%block content %}
+
+{%if categories %}
+{%for cat in categories %}
+
+<div class="category">
+    {{cat.cat_type}}
+</div>
+
+{%endfor%}
+{%endif%}
+
+{%endblock%}

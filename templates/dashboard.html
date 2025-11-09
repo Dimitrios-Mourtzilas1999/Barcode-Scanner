@@ -26,22 +26,52 @@
 <div class="actions">
     <a href="{{url_for('product.register_product')}}" class="btn">Νέο Προϊόν</a>
     <a href="{{url_for('category.register_category')}}" class="btn">Νέα Κατηγορία</a>
-    <a href="" class="btn">Ανάθεση προϊόντος σε κατηγορία</a>
+    <a href="{{url_for('category.assign_to_category')}}" class="btn">Ανάθεση προϊόντος σε κατηγορία</a>
+    <a href="{{url_for('category.categories')}}" class="btn">Κατηγορίες</a>
 </div>
 
-<div class="container">
-    {%for product in products%}
-    <div class="product" data-barcode="{{product.barocde}}">
-        <span class="product-desc">
-            {{product.desc}}
-        </span>
-        <img src="{{product.image_file}}" alt="Image">
-        <span class="product-barcode">
-            {{product.barcode}}
-        </span>
-    </div>
-    {%endfor%}
-</div>
+
+<table class="products">
+
+    <thead>
+        <tr>
+            <th>BARCODE</th>
+            <th>ΠΕΡΙΓΡΑΦΗ</th>
+            <th>ΑΠΟΘΕΜΑ</th>
+            <th>ΤΙΜΗ</th>
+            <th>ΕΝΗΜΕΡΩΘΗΚΕ</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            {%for product in products %}
+            <td>
+                <input type="checkbox" data-barcode="{{product.barcode}}" class="product-checkbox">
+            </td>
+            <td>
+                {{product.barcode}}
+            </td>
+            
+            <td>
+                {{product.desc}}
+            </td>
+            <td>
+                {{product.stock}}
+            </td>
+            <td>
+                {{product.price}}
+            </td>
+            <td>
+                {{product.date_updated}}
+            </td>
+            <td>
+                {{product.category.cat_type}}
+            </td>
+
+            {%endfor%}
+        </tr>
+    </tbody>
+</table>
 
 {%include 'pagination.html'%}
 

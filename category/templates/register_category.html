@@ -1,0 +1,23 @@
+{%extends "base.html"%}
+
+
+{%block content %}
+
+{%if form %}
+
+<form action="{{url_for('category.register_category')}}" method="POST">
+
+
+{{ form.hidden_tag() }}
+
+{{form.category_type.label}}
+{{form.category_type()}}
+
+{{form.submit()}}
+
+
+</form>
+{%endif%}
+
+
+{%endblock%}
