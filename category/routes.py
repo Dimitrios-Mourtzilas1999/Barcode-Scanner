@@ -1,4 +1,4 @@
-from flask import Blueprint,request
+from flask import Blueprint,request,render_template
 from forms import RegisterCategoryForm
 from sqlalchemy.exc import DatabaseError
 from models import Category,Product
@@ -22,6 +22,12 @@ def register_category():
             db.session.close()
     return
 
+
+@categorybp.route('/assign',methods=["GET"])
+def assign():
+    
+    return render_template('assign.html')
+
 @categorybp.route('/assign-product-to-category',methods=["POST"])
 def assign_product_to_category():
 
@@ -34,3 +40,5 @@ def assign_product_to_category():
     if products is None:
         return {'status':'error','message':'Product could not be found'}
     
+    try:
+        db.session.query()
