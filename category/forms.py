@@ -1,8 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired
 from wtforms import StringField,SubmitField,SelectField
-
-from utils.helper import get_categories
+from models import Category
+from extensions import db
 
 class RegisterCategoryForm(FlaskForm):
 
@@ -12,6 +12,11 @@ class RegisterCategoryForm(FlaskForm):
 
 class AssignProductForm(FlaskForm):
     
-    cat_type = SelectField('Επιλογή Κατηγορίας',choices=get_categories())
-    submit =  SubmitField('Ολοκλήρωση')
+
+    def __init__(self,  **kwargs):
+        super().__init__( **kwargs)
+        self.categories.choices = [(str(c.id), c.cat_type) for c in Category.query.all()]
+
+    categories = SelectField('Επιλογή Κατηγορίας', choices=[],render_kw={'class':'categories'})
+    submit =  SubmitField('Ολοκλήρωση',render_kw={'class':'submit'})
     

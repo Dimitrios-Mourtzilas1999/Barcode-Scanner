@@ -4,7 +4,14 @@ from models import User
 from flask_login import login_user,logout_user,login_required
 
 
-authbp = Blueprint('auth/',__name__)
+authbp = Blueprint(
+    'auth',                  # name of the blueprint
+    __name__,
+    static_folder='static',  # folder relative to this file
+    static_url_path='/auth/static',  # URL to serve static files for this blueprint
+    template_folder='templates'      # folder relative to this file
+)
+
 
 @authbp.route('/login',methods=["GET","POST"])
 def login():

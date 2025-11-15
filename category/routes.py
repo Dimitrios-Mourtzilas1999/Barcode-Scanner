@@ -1,4 +1,4 @@
-from flask import Blueprint,request,render_template,redirect,url_for
+from flask import Blueprint,request,render_template,redirect,url_for,flash
 from .forms import RegisterCategoryForm,AssignProductForm
 from sqlalchemy.exc import DatabaseError,SQLAlchemyError
 from models import Category,Product
@@ -7,7 +7,7 @@ from extensions import db
 categorybp = Blueprint('category',__name__,static_folder='static',static_url_path='/static',template_folder='templates')
 
 
-@categorybp.route('/',methods=["GET"])
+@categorybp.route('/list',methods=["GET"])
 def categories():
     categories = Category.query.all()
     return render_template('categories_index.html',categories=categories)
@@ -29,29 +29,25 @@ def register_category():
         print(rgCatForm.errors)
     return render_template('register_category.html', form=rgCatForm)
 
-@categorybp.route('/assign-to-category',methods=["GET"])
-def assign_to_category():
-    apf = AssignProductForm()
-    return render_template('assign.html',form=apf)
 
-@categorybp.route('/set-to-category',methods=["POST"])
-def assign_product_to_category():
+
+@categorybp.route('/assign-to-category', methods=["POST"])
+def assign_to_category():
 
     data = request.get_json()
-    if not data:
-        return {'status':'error','message':'Data could not be parsed'}
-    
-    barcode = data.get('barcode')
-    products = db.session.query(Product).filter(Product.barcode.in_(barcode)).all()
-    if products is None:
-        return {'status':'error','message':'Product could not be found'}
-    try:
-        prs = db.session.query(Product).filter(Product.barcode.in_(data.get('barcode'))).all()
-        for pr in prs:
-            pr.cat_id = db.session.query(Category).filter(Category.cat_type == data.get('cat')).first().id
-        db.session.commit()
-    except DatabaseError as e:
-        print(f"[ERROR]: {e}")
-        db.session.rollback()
-    finally:
-        db.session.close()
+    barcodes = data.get('barcodes')
+    category_id = data.get('category_id')
+
+    category = Category.query.filter(Category.id == category_id).first()
+    if not category:
+        return {"error": "Invalid category"}, 400
+
+    products = Product.query.filter(Product.barcode.in_(barcodes)).all()
+    print([p.id for p in products])
+    for p in products:
+        p.cat_id = category.id
+    db.session.commit()
+
+    return {"message": f"{len(products)} products assigned to {category.cat_type}"}, 200
+
+

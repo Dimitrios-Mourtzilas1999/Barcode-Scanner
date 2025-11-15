@@ -2,6 +2,7 @@
 
 
 {%block css %}
+<link rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}">
 <link rel="stylesheet" href="{{url_for('static',filename='css/dashboard.css')}}">
 {%endblock%}
 
@@ -24,29 +25,31 @@
 
 
 <div class="actions">
-    <a href="{{url_for('product.register_product')}}" class="btn">Νέο Προϊόν</a>
-    <a href="{{url_for('category.register_category')}}" class="btn">Νέα Κατηγορία</a>
-    <a href="{{url_for('category.assign_to_category')}}" class="btn">Ανάθεση προϊόντος σε κατηγορία</a>
-    <a href="{{url_for('category.categories')}}" class="btn">Κατηγορίες</a>
+    <a href="{{url_for('product.register_product')}}" class="btn btn-primary assign_btn">Νέο Προϊόν</a>
+    <a href="{{url_for('category.register_category')}}" class="btn btn-primary">Νέα Κατηγορία</a>
+    <button id="btn" class="btn btn-secondary">Ανάθεση προϊόντος σε Κατηγορία</button> 
+    <a href="{{url_for('category.categories')}}" class="btn btn-secondary">Κατηγορίες</a>
 </div>
 
 
-<table class="products">
+<table class="table table-striped">
 
     <thead>
         <tr>
+          <th></th>
             <th>BARCODE</th>
             <th>ΠΕΡΙΓΡΑΦΗ</th>
             <th>ΑΠΟΘΕΜΑ</th>
             <th>ΤΙΜΗ</th>
             <th>ΕΝΗΜΕΡΩΘΗΚΕ</th>
+            <th>ΚΑΤΗΓΟΡΙΑ</th>
         </tr>
     </thead>
     <tbody>
-        <tr>
             {%for product in products %}
+      <tr>
             <td>
-                <input type="checkbox" data-barcode="{{product.barcode}}" class="product-checkbox">
+                <input type="checkbox" value="{{product.barcode}}" name="barcodes" class="product-checkbox" id="product_checkbox">
             </td>
             <td>
                 {{product.barcode}}
@@ -65,13 +68,37 @@
                 {{product.date_updated}}
             </td>
             <td>
-                {{product.category.cat_type}}
+                {{product.category.cat_type | default('-')}}
             </td>
 
-            {%endfor%}
         </tr>
-    </tbody>
+            {%endfor%}
+
+      </tbody>
 </table>
+
+
+<div id="assignModal" class="modal hidden" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="assignForm">
+        {{ form.hidden_tag() }}
+        <div class="modal-header">
+          <h5 class="modal-title">Assign Selected Products</h5>
+          <button type="button" class=" btn close">&times;</button>
+        </div>
+        <div class="modal-body">
+          {{ form.categories.label }}
+          {{ form.categories() }}
+          <input type="hidden" name="barcodes" id="modal-barcodes">
+        </div>
+        <div class="modal-footer">
+          {{ form.submit(class="btn btn-primary") }}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 {%include 'pagination.html'%}
 

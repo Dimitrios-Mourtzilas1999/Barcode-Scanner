@@ -30,7 +30,7 @@ class Product(db.Model):
     cat_id = db.Column(db.Integer,db.ForeignKey('category.id'),nullable=True)
 
     def __repr__(self):
-        return f"Generated QR Code {self.id} - {self.bar}"
+        return f"Generated QR Code {self.id} - {self.barcode}"
 
 
 class Roles(db.Model):

@@ -1,10 +1,12 @@
 from flask import render_template, redirect, url_for
-from flask import Flask
+from flask import Flask,jsonify
 from flask_migrate import Migrate
 from extensions import db, login_manager
 from models import User, Product
+from category.forms import AssignProductForm
 import sys, os
 import pymysql
+
 
 pymysql.install_as_MySQLdb()
 
@@ -55,8 +57,17 @@ def index():
 @app.route("/dashboard", methods=["GET", "POST"])
 def dashboard():
     products = db.session.query(Product).all()
-    return render_template("dashboard.html", products=products)
+    print(products)
+    form = AssignProductForm()
+    return render_template("dashboard.html", products=products,form=form)
 
+
+@app.route('/fetch-product/<int:barcode>',methods=["POST"])
+def fetch_product(barcode):
+    product = Product.query.filter(Product.barcode == barcode).first()
+    if not product:
+        return jsonify({'status':'error','message':'Product not found'})
+    return jsonify({'status':'success','info':product})
 
 if __name__ == "__main__":
 

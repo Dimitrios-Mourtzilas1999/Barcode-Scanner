@@ -1,29 +1,60 @@
 {% extends "base.html" %}
-{%block content %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('auth.static', filename='css/login.css') }}">
+{% endblock %}
+
+{% block content %}
 
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-    <div class="flashes">
+    <div class="flashes container mt-3">
       {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
           {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       {% endfor %}
     </div>
   {% endif %}
 {% endwith %}
 
+<section class="login-section my-5">
 
-<form action="{{url_for('auth.login')}}" method="POST">
+  <div class="text-center mb-4">
+    <img src="{{ url_for('auth.static', filename='images/mg_solutions.jpg') }}" alt="Logo" class="logo img-fluid">
+  </div>
 
-{{form.hidden_tag()}}
-{{form.username.label}}
-{{form.username()}}
-{{form.password.label}}
-{{form.password()}}
-{{form.submit()}}
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm p-4">
 
-</form>
+          <h2 class="card-title text-center mb-4">Login</h2>
 
+          <form action="{{ url_for('auth.login') }}" method="POST" class="needs-validation" novalidate>
+            {{ form.hidden_tag() }}
 
-{%endblock%}
+            <div class="mb-3">
+              {{ form.username.label(class="form-label") }}
+              {{ form.username(class="form-control", placeholder="Enter your username") }}
+            </div>
+
+            <div class="mb-3">
+              {{ form.password.label(class="form-label") }}
+              {{ form.password(class="form-control", placeholder="Enter your password") }}
+            </div>
+
+            <div class="d-grid mt-3">
+              {{ form.submit(class="btn btn-primary btn-block") }}
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+{% endblock %}
