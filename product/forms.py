@@ -1,12 +1,12 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired,Length
 from flask_wtf.file import FileField, FileAllowed
 
 
 class ProductRegistrationForm(FlaskForm):
 
-    barcode = IntegerField("Barcode", validators=[DataRequired()])
+    barcode = StringField("Barcode",  validators=[DataRequired(),Length(max=255)])
     desc = StringField("Product Name", validators=[DataRequired()])
     price = IntegerField("Product Price", validators=[DataRequired()])
     stock = IntegerField("Product Quantity", validators=[DataRequired()])

@@ -2,28 +2,65 @@
 
 
 {%block css %}
-<link rel="stylesheet" href="{{url_for('static',filename='css/register_product.css')}}">
+<link rel="stylesheet" href="{{url_for('static',filename='css/dashboard.css')}}">
+<link rel="stylesheet" href="{{url_for('product.static',filename='css/register_product.css')}}">
+
 {%endblock%}
 
 {%block content %}
 
+<!-- Linear Modern Breadcrumbs -->
+<nav aria-label="breadcrumb" class="mb-4">
+  <ol class="breadcrumb-linear">
+    <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Register Product</li>
+  </ol>
+</nav>
+
 {%if form %}
 
-<form action="{{url_for('product.register_product')}}" method="POST" class="product-register-form">
+<form action="{{ url_for('product.register_product') }}" 
+      method="POST" 
+      enctype="multipart/form-data"
+      class="container p-4 mt-4 shadow rounded bg-white">
 
-    {{form.hidden_tag()}}
-    {{form.barcode.label}}
-    {{form.barcode()}}
-    {{form.desc.label}}
-    {{form.desc()}}
-    {{form.price.label}}
-    {{form.price()}}
-    {{form.stock.label}}
-    {{form.stock()}}
-    {{form.image.label}}
-    {{form.image()}}
-    {{form.submit()}}
+    {{ form.hidden_tag() }}
+
+    <h4 class="mb-4 text-center">Register Product</h4>
+
+    <div class="mb-3">
+        {{ form.barcode.label(class="form-label fw-semibold") }}
+        {{ form.barcode(class="form-control", placeholder="Enter barcode") }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.desc.label(class="form-label fw-semibold") }}
+        {{ form.desc(class="form-control", placeholder="Product description") }}
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            {{ form.price.label(class="form-label fw-semibold") }}
+            {{ form.price(class="form-control", placeholder="0.00") }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+            {{ form.stock.label(class="form-label fw-semibold") }}
+            {{ form.stock(class="form-control", placeholder="0") }}
+        </div>
+    </div>
+
+    <div class="mb-3">
+        {{ form.image.label(class="form-label fw-semibold") }}
+        {{ form.image(class="form-control") }}
+    </div>
+
+    <div class="text-center mt-4">
+        {{ form.submit(class="btn btn-primary px-4 py-2") }}
+    </div>
+
 </form>
+
 
 {%endif%}
 

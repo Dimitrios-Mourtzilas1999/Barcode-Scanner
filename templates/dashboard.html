@@ -4,6 +4,8 @@
 {%block css %}
 <link rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}">
 <link rel="stylesheet" href="{{url_for('static',filename='css/dashboard.css')}}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 {%endblock%}
 
 {%block js %}
@@ -11,6 +13,21 @@
 {%endblock%}
 
 {%block content%}
+
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flashes container mt-3">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
 
 
 {%include 'user-nav.html'%}
@@ -22,60 +39,119 @@
 
 {%endif%}
 
+<div class="product-actions">
+  <button id="assignBtn" class="btn btn-assign" aria-label="Assign product to category">
+    <i class="fa fa-exchange-alt" aria-hidden="true"></i>
+    <span>Ανάθεση προϊόντος σε Κατηγορία</span>
+  </button>
 
-
-<div class="actions">
-    <a href="{{url_for('product.register_product')}}" class="btn btn-primary assign_btn">Νέο Προϊόν</a>
-    <a href="{{url_for('category.register_category')}}" class="btn btn-primary">Νέα Κατηγορία</a>
-    <button id="btn" class="btn btn-secondary">Ανάθεση προϊόντος σε Κατηγορία</button> 
-    <a href="{{url_for('category.categories')}}" class="btn btn-secondary">Κατηγορίες</a>
+  <button class="btn btn-delete" aria-label="Delete product">
+    <i class="fa fa-trash" aria-hidden="true"></i>
+    <span>Διαγραφή Προϊόντος</span>
+  </button>
 </div>
 
 
-<table class="table table-striped">
+<div class="modal fade" id="assignModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="assignForm" method="POST" action="{{ url_for('category.assign_to_category') }}">
+        {{ form.hidden_tag() }}
 
-    <thead>
-        <tr>
-          <th></th>
-            <th>BARCODE</th>
-            <th>ΠΕΡΙΓΡΑΦΗ</th>
-            <th>ΑΠΟΘΕΜΑ</th>
-            <th>ΤΙΜΗ</th>
-            <th>ΕΝΗΜΕΡΩΘΗΚΕ</th>
-            <th>ΚΑΤΗΓΟΡΙΑ</th>
-        </tr>
-    </thead>
-    <tbody>
-            {%for product in products %}
-      <tr>
-            <td>
-                <input type="checkbox" value="{{product.barcode}}" name="barcodes" class="product-checkbox" id="product_checkbox">
-            </td>
-            <td>
-                {{product.barcode}}
-            </td>
-            
-            <td>
-                {{product.desc}}
-            </td>
-            <td>
-                {{product.stock}}
-            </td>
-            <td>
-                {{product.price}}
-            </td>
-            <td>
-                {{product.date_updated}}
-            </td>
-            <td>
-                {{product.category.cat_type | default('-')}}
-            </td>
+        <div class="modal-header">
+          <h5 class="modal-title">Ανάθεση Προϊόντων σε Κατηγορία</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
 
-        </tr>
-            {%endfor%}
+        <div class="modal-body">
+          <label class="form-label">{{ form.categories.label.text }}</label>
+          {{ form.categories(class="form-select") }}
 
-      </tbody>
-</table>
+          <input type="hidden" name="barcodes" id="modal-barcodes">
+        </div>
+
+        <div class="modal-footer">
+          {{ form.submit(class="btn btn-primary") }}
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Άκυρο</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<nav id="sidebarMenu" class="sidebar">
+    <div class="sidebar__header">
+        <h3>Μενού Δράσεων</h3>
+    </div>
+
+    <ul class="sidebar__actions">
+        <li>
+            <a href="{{ url_for('product.register_product') }}" class="sidebar__btn">
+                <i class="fa fa-plus-circle"></i> Νέο Προϊόν
+            </a>
+        </li>
+        <li>
+            <a href="{{ url_for('category.register_category') }}" class="sidebar__btn">
+                <i class="fa fa-tags"></i> Νέα Κατηγορία
+            </a>
+        </li>
+        <li>
+          
+        </li>
+        <li>
+            <a href="{{ url_for('category.categories') }}" class="sidebar__btn">
+                <i class="fa fa-list"></i> Κατηγορίες
+            </a>
+        </li>
+        <li>
+            <div class="barcode-searcher">
+                <input type="text" id="barcode" class="sidebar__input" placeholder="Αναζήτηση Barcode" required>
+                <button type="button" class="sidebar__search-btn">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+        </li>
+        <li>
+          <div class="warning-container">
+            <i class="fa fa-warning"></i>
+            <span class="warning-info"></span>
+          </div>
+        </li>
+    </ul>
+</nav>
+
+
+
+<div class="table-container">
+    <table class="modern-table">
+        <thead>
+            <tr>
+                <th><input type="checkbox" id="selectAll"></th>
+                <th>BARCODE</th>
+                <th>ΠΕΡΙΓΡΑΦΗ</th>
+                <th>ΑΠΟΘΕΜΑ</th>
+                <th>ΤΙΜΗ</th>
+                <th>ΕΝΗΜΕΡΩΘΗΚΕ</th>
+                <th>ΚΑΤΗΓΟΡΙΑ</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>
+                    <input type="checkbox" value="{{ product.barcode }}" name="barcodes" class="product-checkbox">
+                </td>
+                <td>{{ product.barcode }}</td>
+                <td>{{ product.desc }}</td>
+                <td>{{ product.stock }}</td>
+                <td>{{ product.price }}</td>
+                <td>{{ product.date_updated }}</td>
+                <td>{{ product.category.cat_type | default('-') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 
 <div id="assignModal" class="modal hidden" tabindex="-1">
@@ -85,7 +161,6 @@
         {{ form.hidden_tag() }}
         <div class="modal-header">
           <h5 class="modal-title">Assign Selected Products</h5>
-          <button type="button" class=" btn close">&times;</button>
         </div>
         <div class="modal-body">
           {{ form.categories.label }}

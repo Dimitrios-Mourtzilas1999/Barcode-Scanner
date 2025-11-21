@@ -1,50 +1,74 @@
 document.addEventListener('DOMContentLoaded',()=>{
 
-    let barcode = "";
-    let lastKeyTime = Date.now();
-    const scanDelay = 30;
 
- document.addEventListener("keydown", (event) => {
-        const now = Date.now();
-        const timeDiff = now - lastKeyTime;
-        lastKeyTime = now;
+    const modal = document.getElementById('assignModal');
+    const modalButton = document.getElementById('assignBtn');
+    const searchButton = document.querySelector('.sidebar__search-btn');
+    const sidebar = document.getElementById("sidebarMenu");
+    const allElements = document.getElementById('selectAll');
+    const deleteButton = document.querySelector('.btn-delete');
 
-        // If typing is too slow, reset barcode (human typed)
-        if (timeDiff > scanDelay) {
-            barcode = "";
+
+    deleteButton?.addEventListener('click',()=>{
+        const checkboxes = document.querySelectorAll('input[name="barcodes"]:checked');
+        const barcodes = Array.from(checkboxes).map(cb => cb.value);
+        let url = window.location.origin = 'product/delete';
+        console.log(barcodes);
+        if(barcodes.length == 0){
+            alert('No products selected');
+            return;
         }
+        fetch(url,{
+            method:"POST",
+            body:JSON.stringify({'barcodes':barcodes}),
+            headers: { 'Content-Type': 'application/json' },
 
-        // Ignore modifier keys
-        if (event.key.length === 1) {
-            barcode += event.key;
-        }
+        }).then(response=>{
+            return response.json();
+        }).then(()=>{
+            window.location.reload();
+        })
+    })
 
-        // Heuristic: if barcode length reaches expected size, trigger fetch
-        // Adjust 8–14 depending on your barcode type
-        if (barcode.length >= 12) {
-            fetchProduct(barcode);
-            console.log(barcode);
-            barcode = ""; // reset for next scan
+    allElements.addEventListener('click',()=>{
+        let checkboxes = document.querySelectorAll('.product-checkbox');
+        checkboxes.forEach(function(checkbox) {
+            checkbox.checked = selectAll.checked;
+        });
+    })
+
+    document.addEventListener("mousemove", function(e) {
+        if (e.clientX <= 5) { // 5px from left edge
+            sidebar.style.left = "0"; // slide in
         }
     });
 
+    // Detect mouse leaving sidebar
+    sidebar.addEventListener("mouseleave", function() {
+        sidebar.style.left = "-250px"; // slide out
+    });
+
+    searchButton.addEventListener('click',()=>{
+        let barcode = document.querySelector('.sidebar__input');
+        if(barcode.value == ""){
+            let warningElement = document.querySelector('.warning-container');
+            if(!warningElement) return;
+            if(warningElement.classList.contains('hidden')) warningElement.classList.remove('hidden');
+            warningElement.textContent = "Εισάγετε barcode";
+
+            
+        }
+        
+    })
 
 
-    const modal = document.getElementById('assignModal');
-    const modalButton = document.querySelector('.assign_btn');
-    const closeButton = document.querySelector('.close');
-
-
-    if(!modalButton || !closeButton)
+    if(!modalButton)
     {
         console.error('Element not found');
         return;
     }
 
-    closeButton.addEventListener('click',()=>{
-        if(!modal.classList.contains('hidden'))
-            modal.classList.add('hidden');
-    })
+ 
     modalButton.addEventListener('click',()=>{
         if(modal.classList.contains('hidden'))
             modal.classList.remove('hidden');
@@ -77,8 +101,7 @@ document.getElementById('assignForm').addEventListener('submit', function(e) {
         body: JSON.stringify({ barcodes, category_id: categoryId })
     })
     .then(res => res.json())
-    .then(data => {
-        alert(data.message || data.error);
+    .then(() => {
         location.reload(); // refresh dashboard to show changes
     });
 });

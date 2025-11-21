@@ -1,11 +1,21 @@
-from . import productbp
-from flask import render_template, redirect, url_for, request, flash, current_app
+from flask import jsonify, render_template, redirect, url_for, request, flash, current_app
+from sqlalchemy.exc import SQLAlchemyError
 from .forms import ProductRegistrationForm, ProductEditForm
 from extensions import db
 from models import Product
 from werkzeug.utils import secure_filename
 import os
 from utils.helper import allowed_file
+from flask import Blueprint
+
+productbp = Blueprint(
+    "product",
+    __name__,
+    url_prefix="/product",
+    static_folder="static",
+    static_url_path='/static',
+    template_folder="templates",
+)
 
 
 @productbp.route("/register", methods=["GET", "POST"])
@@ -19,7 +29,8 @@ def register_product():
             .first()
         )
         if product:
-            return redirect(url_for("dashboard", message="Το προϊόν υπαρχει ήδη"))
+            flash('Το προϊόν υπάρχει ήδη','danger')
+            return redirect(url_for("dashboard"))
         else:
             
             try:
@@ -56,3 +67,25 @@ def upload_file():
             flash("File uploaded successfully!")
             return redirect(url_for("uploaded_file", filename=filename))
     return render_template("upload.html")
+
+@productbp.route('/delete',methods=["POST"])
+def delete():
+
+    data = request.get_json()
+    if not data:
+        return jsonify({'status':'error','message':'Could not read data'}),400
+    
+    barcodes = data.get('barcodes', [])
+    products = Product.query.filter(Product.barcode.in_(barcodes)).all()
+
+    try:
+        for product in products:
+            db.session.delete(product)
+        db.session.commit()
+        flash('Επιτυχης διαγραφη','success')
+    except SQLAlchemyError as e:
+        print(f"[ERROR]: {e}")
+        flash('Πρόβλημα κατά την διαδικασία','danger')
+        db.session.rollback()
+        return jsonify({'status':'error','message':'Operation could not be completed'}),400
+    return jsonify({'status':'success','message':'Successfull operation'}),200

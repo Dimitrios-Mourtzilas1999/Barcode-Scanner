@@ -1,14 +1,56 @@
 {%extends "base.html"%}
 
 
+{%block css %}
+
+<link rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}">
+
+<link rel="stylesheet" href="{{url_for('category.static',filename='css/categories_index.css')}}">
+{%endblock%}
+
 {%block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flashes container mt-3">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+
 
 {%if categories %}
 {%for cat in categories %}
 
-<div class="category">
-    {{cat.cat_type}}
+
+
+
+<div class="table-container">
+    <table class="modern-table">
+        <thead>
+            <tr>
+                <th>A/A</th>
+                <th>ΠΕΡΙΓΡΑΦΗ</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cat in categories %}
+            <tr>
+                <td></td>
+                <td>{{cat.cat_type}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
 </div>
+
 
 {%endfor%}
 {%endif%}

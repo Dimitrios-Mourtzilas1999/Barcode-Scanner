@@ -1,9 +1,10 @@
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for,request
 from flask import Flask,jsonify
 from flask_migrate import Migrate
 from extensions import db, login_manager
 from models import User, Product
 from category.forms import AssignProductForm
+from utils.helper import paginate
 import sys, os
 import pymysql
 
@@ -27,7 +28,7 @@ def create_app():
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"
     from auth import authbp as auth_blueprint
-    from product import productbp as product_blueprint
+    from product.routes import productbp as product_blueprint
     from category.routes import categorybp as category_blueprint
 
     app.register_blueprint(auth_blueprint)
@@ -57,9 +58,12 @@ def index():
 @app.route("/dashboard", methods=["GET", "POST"])
 def dashboard():
     products = db.session.query(Product).all()
+    page = request.args.get('page',1,type=int)
+    query = Product.query.order_by(Product.date_updated.desc())
+    products,page,pages,total = paginate(query,page,per_page=20)
     print(products)
     form = AssignProductForm()
-    return render_template("dashboard.html", products=products,form=form)
+    return render_template("dashboard.html", products=products,form=form,items=products,page=page,pages=pages,total=total)
 
 
 @app.route('/fetch-product/<int:barcode>',methods=["POST"])

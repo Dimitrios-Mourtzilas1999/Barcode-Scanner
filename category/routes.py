@@ -4,7 +4,7 @@ from sqlalchemy.exc import DatabaseError,SQLAlchemyError
 from models import Category,Product
 from extensions import db
 
-categorybp = Blueprint('category',__name__,static_folder='static',static_url_path='/static',template_folder='templates')
+categorybp = Blueprint('category',__name__,static_folder='static',static_url_path='/categories/static',template_folder='templates')
 
 
 @categorybp.route('/list',methods=["GET"])
@@ -40,14 +40,22 @@ def assign_to_category():
 
     category = Category.query.filter(Category.id == category_id).first()
     if not category:
-        return {"error": "Invalid category"}, 400
+        flash('Η κατηγορία δεν υπάρχει','error')
+        return {'status': 400}
 
     products = Product.query.filter(Product.barcode.in_(barcodes)).all()
     print([p.id for p in products])
-    for p in products:
-        p.cat_id = category.id
-    db.session.commit()
-
-    return {"message": f"{len(products)} products assigned to {category.cat_type}"}, 200
+    try:
+        for p in products:
+            p.cat_id = category.id
+        db.session.commit()
+    except DatabaseError as e:
+        print(f"[ERROR]: {e}")
+        db.session.rollback()
+        flash('Αποτυχία διαδικασία καταχώρησης','error')
+        return {'status':500}
+    
+    flash(f'Επιτυχής καταχώρηση προϊόντων στην κατηγορία {category.cat_type}','success')
+    return {'status':200}
 
 
