@@ -84,26 +84,31 @@ def api_products():
         })
     return jsonify({"data": data})  # <-- wrap in "data"
 
-
 @app.route("/dashboard", methods=["GET", "POST"])
 def dashboard():
-    products = db.session.query(Product).all()
-    page = request.args.get('page',1,type=int)
+    barcode = request.args.get("barcode", "").strip()
+    page = request.args.get('page', 1, type=int)
+
+    # Base query
     query = Product.query.order_by(Product.date_updated.desc())
-    products,page,pages,total = paginate(query,page,per_page=20)
+
+    # Apply barcode filter if provided
+    if barcode:
+        query = query.filter(Product.barcode == barcode)
+
+    products, page, pages, total = paginate(query, page, per_page=5)
     categories = get_categories()
     form = AssignProductForm()
+
     context = {
-        'form':form,
-        'products':products,
-        'page':page,
-        'pages':pages,
-        'total':total,
-        'products':products,
-        'categories':categories
+        'form': form,
+        'products': products,
+        'page': page,
+        'pages': pages,
+        'total': total,
+        'categories': categories
     }
     return render_template("dashboard.html", **context)
-
 
 @app.route('/fetch-product/<int:barcode>',methods=["POST"])
 def fetch_product(barcode):

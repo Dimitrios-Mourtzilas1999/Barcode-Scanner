@@ -42,7 +42,7 @@
 
 {%endif%}
 
-<div class="product-actions hidden">
+<div class="product-actions hidden" id="productActions">
   <button id="assignBtn" class="btn btn-assign" aria-label="Assign product to category">
     <i class="fa fa-exchange-alt" aria-hidden="true"></i>
     <span>Ανάθεση προϊόντος σε Κατηγορία</span>
@@ -58,7 +58,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
 
-      <form id="filterForm">   <!-- <<< WRAP EVERYTHING HERE -->
+      <form id="filterForm"> 
 
         <div class="modal-header">
           <h5 class="modal-title">Φίλτρα</h5>
@@ -72,7 +72,7 @@
               <label for="category" class="form-label">Κατηγορίες</label>
               <select name="category" id="category" class="form-select">
                 {% for id, name in categories.items() %}
-                <option value="{{ id }}">{{ name }}</option>
+                <option value="{{ name }}">{{ name }}</option>
                 {% endfor %}
               </select>
             </div>
@@ -80,8 +80,9 @@
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <button type="submit" class="btn btn-primary">Apply Filters</button>
+          <button type="button" class="btn btn-warning" id="resetFilters">Reset Filters</button>
+
         </div>
 
       </form>
@@ -126,11 +127,11 @@
         <i class="fa fa-filter"></i>
       </div>
 
-      <div class="barcode-searcher" id="barcodeSearch">
-          <input type="text" id="barcode" class="input" placeholder="Αναζήτηση Barcode" required>
-          <button type="button" class="search-btn">
-              <i class="fa fa-search"></i>
-          </button>
+      <div class="barcode-searcher">
+        <input type="text" id="barcode" placeholder="Αναζήτηση Barcode" required>
+        <a href="#" id="barcodeSearchBtn">
+            <i class="fa fa-search"></i>
+        </a>
       </div>
 </div>
 
@@ -138,13 +139,13 @@
     <table class="modern-table" id="productTable">
         <thead>
             <tr>
-                <th><input type="checkbox" id="selectAll" name="barcodes" class="product-checkbox"></th>
-                <th>BARCODE</th>
-                <th>ΠΕΡΙΓΡΑΦΗ</th>
-                <th>ΑΠΟΘΕΜΑ</th>
-                <th>ΤΙΜΗ</th>
-                <th>ΕΝΗΜΕΡΩΘΗΚΕ</th>
-                <th>ΚΑΤΗΓΟΡΙΑ</th>
+              <th><input type="checkbox" id="selectAll" name="barcodes"></th>
+              <th data-sort="barcode">BARCODE <span class="sort-icon"></span></th>
+              <th data-sort="desc">ΠΕΡΙΓΡΑΦΗ <span class="sort-icon"></span></th>
+              <th data-sort="stock">ΑΠΟΘΕΜΑ <span class="sort-icon"></span></th>
+              <th data-sort="price">ΤΙΜΗ <span class="sort-icon"></span></th>
+              <th data-sort="updated">ΕΝΗΜΕΡΩΘΗΚΕ <span class="sort-icon"></span></th>
+              <th data-sort="category">ΚΑΤΗΓΟΡΙΑ <span class="sort-icon"></span></th>                
             </tr>
         </thead>
         <tbody>
@@ -153,7 +154,9 @@
                 <td>
                   <input type="checkbox" name="barcodes" value="{{product.barcode}}" class="product-checkbox">
                 </td>
-                <td>{{product.barcode}}</td>
+                <td><a href="{{url_for('product.edit_product',barcode=product.barcode)}}">
+                  {{product.barcode}}
+                </a> </td>
                 <td>{{product.desc}}</td>
                 <td>{{product.stock}}</td>
                 <td>{{product.price}}€</td>

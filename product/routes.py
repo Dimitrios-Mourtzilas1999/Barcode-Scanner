@@ -46,13 +46,23 @@ def register_product():
 
     return render_template("register_product.html", form=form)
 
-
 @productbp.route("/edit", methods=["GET", "POST"])
 def edit_product():
-    form = ProductEditForm()
+    barcode = request.args.get('barcode')
+    product = Product.query.filter_by(barcode=barcode).first()
+
+    if not product:
+        flash("Product not found", "error")
+        return redirect(url_for("productbp.list_products"))
+
+    form = ProductEditForm(obj=product)
+
     if form.validate_on_submit():
-        data = form.data
-        print(data)
+        form.populate_obj(product)
+        db.session.commit()
+        flash("Product updated successfully!", "success")
+        return redirect(url_for("dashboard"))
+
     return render_template("edit_product.html", form=form)
 
 
