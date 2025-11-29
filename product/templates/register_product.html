@@ -9,14 +9,7 @@
 
 {%block content %}
 
-<!-- Linear Modern Breadcrumbs -->
-<nav aria-label="breadcrumb" class="mb-4">
-  <ol class="breadcrumb-linear">
-    <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Register Product</li>
-  </ol>
-</nav>
-
+{%include 'menu.html'%}
 {%if form %}
 
 <form action="{{ url_for('product.register_product') }}" 

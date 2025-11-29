@@ -1,73 +1,14 @@
-/* Hamburger Button */
-.hamburger-btn {
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    z-index: 1001;
-    background: #007bff;
-    color: #fff;
-    border: none;
-    padding: 0.5rem 0.75rem;
-    font-size: 1.25rem;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-    opacity: 1;
-    visibility: visible;
-}
 
-.hamburger-btn.hidden {
-    opacity: 0;
-    visibility: hidden;
-}
 
-/* Sidebar hidden by default (off screen) */
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: -250px; /* hidden off-screen */
-    width: 250px;
-    height: 100%;
-    background-color:#007bff;
-    color: #fff;
-    transition: left 0.3s ease;
-    z-index: 1000;
-    overflow-y: auto;
-    padding-top: 20px;
-}
-
-.sidebar__header h3 {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 1.2rem;
-}
-
-.sidebar__btn {
-    display: flex;
-    align-items: center;
-    padding: 10px 20px;
-    color: #fff;
-    text-decoration: none;
-    font-size: 0.95rem;
-    transition: background 0.3s ease;
-    border: none;
-    width: 100%;
-    text-align: left;
-}
-
-.sidebar__btn:hover {
-    background-color: #333;
-}
-
-.sidebar__input {
+.input {
     width: 70%;
     padding: 6px 10px;
     border-radius: 6px;
-    border: none;
+    border: 1px solid black;
     margin-right: 5px;
 }
 
-.sidebar__search-btn {
+.search-btn {
     padding: 6px 10px;
     border: none;
     border-radius: 6px;
@@ -155,24 +96,7 @@
 
 
 
-.sidebar__actions{
-    list-style: none;
-
-}
-
-.warning-container{
-    width:100%;
-    display: flex;
-    background-color: #993838;
-    gap: 10px;
-    justify-content: start;
-    align-items: center;
-    border: 1px groove #993838;
-    border-radius: 5px;
-    padding: 5px;
-}
-
-.hidden{
+.product-actions.hidden{
     display:none;
 }
 
@@ -183,4 +107,67 @@
     justify-content: center;
     align-items: center;
     width: 100%;
+}
+
+.actions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+.categories-container {
+    width: 53%;
+    position: relative;
+    top: 8px;
+}
+
+.filters {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: #ffffffcc;
+  backdrop-filter: blur(8px);
+  border: 1px solid #e4e4e4;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.25s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  position: relative;
+  top: 7px;
+}
+
+.filters i {
+  font-size: 18px;
+  color: #555;
+  transition: 0.25s;
+}
+
+/* Hover */
+.filters:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.filters:hover i {
+  color: #000;
+}
+
+/* Active click feedback */
+.filters:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+
+.actions-wrapper{
+    display: flex;
+    justify-content: start;
+    gap: 20px;
+    align-items: center;
+    width: 40%;
+    position: relative;
+    left: 1%;
 }

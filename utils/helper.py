@@ -1,18 +1,18 @@
 
+from typing import OrderedDict
 from models import Category
 from math import ceil
-
-
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def get_categories():
-    empty_choice = ('', '----')  # placeholder option
-    categories = [(c.id, c.cat_type) for c in Category.query.all()]
-    return [empty_choice] + categories    
+    empty_choice = (None, '----')
+    items = [(c.id, c.cat_type) for c in Category.query.all()]
+    items.sort(key=lambda x: x[1])   # sort by cat_type
 
+    return OrderedDict([empty_choice] + items)
 
 def paginate(query, page, per_page=20):
     """
@@ -29,3 +29,4 @@ def paginate(query, page, per_page=20):
     pages = ceil(total / per_page)
 
     return items, page, pages, total
+

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{%block js %}
+<script src="{{url_for('static',filename='js/menu.js')}}"></script>
+{%endblock%}
+
+{%block css %}
+<link rel="stylesheet" href="{{url_for('static',filename='css/menu.css')}}">
+{%endblock%}
+
+{% block content %}
+
+<nav id="sidebarMenu" class="sidebar">
+    <div class="sidebar__header">
+    </div>
+
+    <ul class="sidebar__actions">
+        <li>
+            <a href="{{ url_for('dashboard') }}" class="sidebar__btn">
+                <i class="fa fa-home"></i> Αρχική
+            </a>
+        </li>
+        
+        <li>
+            <a href="{{ url_for('product.register_product') }}" class="sidebar__btn">
+                <i class="fa fa-plus-circle"></i> Νέο Προϊόν
+            </a>
+        </li>
+
+        <li>
+            <a href="{{ url_for('category.register_category') }}" class="sidebar__btn">
+                <i class="fa fa-tags"></i> Νέα Κατηγορία
+            </a>
+        </li>
+        <li>
+          
+        </li>
+        <li>
+            <a href="{{ url_for('category.categories') }}" class="sidebar__btn">
+                <i class="fa fa-list"></i> Κατηγορίες
+            </a>
+        </li>
+    </ul>
+</nav>
+
+{% endblock %}

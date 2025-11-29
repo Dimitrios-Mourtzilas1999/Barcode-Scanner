@@ -4,11 +4,12 @@
 {%block css %}
 
 <link rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}">
-
 <link rel="stylesheet" href="{{url_for('category.static',filename='css/categories_index.css')}}">
 {%endblock%}
 
 {%block content %}
+
+{%include 'menu.html'%}
 
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
@@ -26,33 +27,18 @@
 
 
 {%if categories %}
-{%for cat in categories %}
 
+<nav>
+  <div class="categories">
+    {%for category in categories%}
+      <div class="category">
+        <div class="category-name">
+          <a href="{{url_for('category.categories')}}">{{category.cat_type}}</a>
+        </div>
+      </div>
+    {%endfor%}
 
-
-
-<div class="table-container">
-    <table class="modern-table">
-        <thead>
-            <tr>
-                <th>A/A</th>
-                <th>ΠΕΡΙΓΡΑΦΗ</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for cat in categories %}
-            <tr>
-                <td></td>
-                <td>{{cat.cat_type}}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-</div>
-
-
-{%endfor%}
+</nav>
 {%endif%}
 
 {%endblock%}

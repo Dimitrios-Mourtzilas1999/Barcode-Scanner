@@ -1,0 +1,53 @@
+
+/* Sidebar hidden by default (off screen) */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -250px; /* hidden off-screen */
+    width: 250px;
+    height: 100%;
+    background-color:#007bff;
+    color: #fff;
+    transition: left 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+    padding-top: 20px;
+}
+
+.sidebar__header h3 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+.sidebar__btn {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: background 0.3s ease;
+    border: none;
+    width: 100%;
+    text-align: left;
+}
+
+.sidebar__btn:hover {
+    background-color: #333;
+}
+
+
+.barcode-searcher {
+    width: 60%;
+    position: relative;
+    left: 1%;
+    top: 7px;
+}
+
+
+.sidebar__actions{
+    list-style: none;
+
+}
+

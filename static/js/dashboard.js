@@ -1,128 +1,130 @@
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded', () => {
 
-
+    // Elements
     const modal = document.getElementById('assignModal');
     const modalButton = document.getElementById('assignBtn');
-    const searchButton = document.querySelector('.sidebar__search-btn');
-    const sidebar = document.getElementById("sidebarMenu");
     const allElements = document.getElementById('selectAll');
     const deleteButton = document.querySelector('.btn-delete');
+    const actionsModal = document.querySelector('.product-actions');
+    const barcodeInput = document.getElementById('barcode');
+    const filterForm = document.getElementById('filterForm');
 
+    // Awesomplete for barcode search
+    const awesomplete = new Awesomplete(barcodeInput, { minChars: 1, maxItems: 10, autoFirst: true });
 
-    deleteButton?.addEventListener('click',()=>{
-        const checkboxes = document.querySelectorAll('input[name="barcodes"]:checked');
-        const barcodes = Array.from(checkboxes).map(cb => cb.value);
-        let url = window.location.origin = 'product/delete';
-        console.log(barcodes);
-        if(barcodes.length == 0){
+    // Show filter modal
+    const filterBtn = document.getElementById('filters');
+    filterBtn?.addEventListener('click', () => {
+        const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
+        filterModal.show();
+    });
+
+    // DataTable initialization
+    const table = $('#productTable').DataTable({
+        ajax: '/api/products',
+        columns: [
+            { data: 'select', orderable: false },
+            { data: 'barcode' },
+            { data: 'desc' },
+            { data: 'stock' },
+            { data: 'price' },
+            { data: 'updated' },
+            { data: 'category' }
+        ],
+        order: [[1, 'asc']],
+        rowCallback: function(row, data) {
+            // Bind checkbox events
+            $(row).find('.product-checkbox').on('change', () => {
+                const anyChecked = $('.product-checkbox:checked').length > 0;
+                if (anyChecked) {
+                    actionsModal.classList.remove('hidden');
+                } else {
+                    actionsModal.classList.add('hidden');
+                }
+            });
+        }
+    });
+
+    // Filter form submit → reload table via Ajax
+    filterForm?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const query = new URLSearchParams(new FormData(filterForm)).toString();
+        table.ajax.url(`/api/products?${query}`).load();
+        bootstrap.Modal.getInstance(document.getElementById('filterModal')).hide();
+    });
+
+    // Barcode autocomplete
+    barcodeInput?.addEventListener('input', async () => {
+        const query = barcodeInput.value;
+        if (!query) return;
+        try {
+            const res = await fetch(`/api/barcodes?q=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            awesomplete.list = data;
+        } catch (err) {
+            console.error('Error fetching barcodes:', err);
+        }
+    });
+
+    // Select All / Deselect All
+    allElements?.addEventListener('click', () => {
+        const checkboxes = document.querySelectorAll('.product-checkbox');
+        const anyChecked = document.querySelectorAll('.product-checkbox:checked').length > 0;
+
+        const newState = !anyChecked; // toggle all
+        checkboxes.forEach(cb => cb.checked = newState);
+
+        if (newState) {
+            actionsModal.classList.remove('hidden');
+        } else {
+            actionsModal.classList.add('hidden');
+        }
+    });
+
+    // Delete selected products
+    deleteButton?.addEventListener('click', () => {
+        const selectedCheckboxes = document.querySelectorAll('.product-checkbox:checked');
+        if (!selectedCheckboxes.length) {
             alert('No products selected');
             return;
         }
-        fetch(url,{
-            method:"POST",
-            body:JSON.stringify({'barcodes':barcodes}),
+
+        const barcodes = Array.from(selectedCheckboxes).map(cb => cb.value);
+        fetch(`${window.location.origin}/product/delete`, {
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-
-        }).then(response=>{
-            return response.json();
-        }).then(()=>{
-            window.location.reload();
+            body: JSON.stringify({ barcodes })
         })
-    })
+        .then(res => res.json())
+        .then(() => table.ajax.reload());
+    });
 
-    allElements.addEventListener('click',()=>{
-        let checkboxes = document.querySelectorAll('.product-checkbox');
-        checkboxes.forEach(function(checkbox) {
-            checkbox.checked = selectAll.checked;
-        });
-    })
-
-    document.addEventListener("mousemove", function(e) {
-        if (e.clientX <= 5) { // 5px from left edge
-            sidebar.style.left = "0"; // slide in
+    // Assign to category modal
+    modalButton?.addEventListener('click', () => {
+        const selected = document.querySelectorAll('.product-checkbox:checked');
+        if (!selected.length) {
+            alert('No products selected');
+            return;
         }
+
+        document.getElementById('modal-barcodes').value = Array.from(selected).map(cb => cb.value).join(',');
+        const assignModal = new bootstrap.Modal(modal);
+        assignModal.show();
     });
 
-    // Detect mouse leaving sidebar
-    sidebar.addEventListener("mouseleave", function() {
-        sidebar.style.left = "-250px"; // slide out
+    // Assign form submission
+    document.getElementById('assignForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const barcodes = document.getElementById('modal-barcodes').value.split(',');
+        const categoryId = document.getElementById('category-assign').value;
+
+        fetch(`${window.location.origin}/category/assign-to-category`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ barcodes, category_id: categoryId })
+        })
+        .then(res => res.json())
+        .then(() => table.ajax.reload());
     });
 
-    searchButton.addEventListener('click',()=>{
-        let barcode = document.querySelector('.sidebar__input');
-        if(barcode.value == ""){
-            let warningElement = document.querySelector('.warning-container');
-            if(!warningElement) return;
-            if(warningElement.classList.contains('hidden')) warningElement.classList.remove('hidden');
-            warningElement.textContent = "Εισάγετε barcode";
-
-            
-        }
-        
-    })
-
-
-    if(!modalButton)
-    {
-        console.error('Element not found');
-        return;
-    }
-
- 
-    modalButton.addEventListener('click',()=>{
-        if(modal.classList.contains('hidden'))
-            modal.classList.remove('hidden');
-    })
-    modalButton.addEventListener('click', function() {
-    const selected = Array.from(document.querySelectorAll('input[name="barcodes"]:checked'));
-    if (!selected.length) {
-        alert('No products selected');
-        return;
-    }
-
-    document.getElementById('modal-barcodes').value = selected.map(cb => cb.value).join(',');
-
-    const modal = new bootstrap.Modal(document.getElementById('assignModal'));
-
-    modal.show();
 });
-
-// Handle form submit via AJAX
-document.getElementById('assignForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const barcodes = document.getElementById('modal-barcodes').value.split(',');
-    const categoryId = document.getElementById('categories').value;
-    const url = window.location.origin + '/assign-to-category';
-
-    fetch(url, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ barcodes, category_id: categoryId })
-    })
-    .then(res => res.json())
-    .then(() => {
-        location.reload(); // refresh dashboard to show changes
-    });
-});
-
-})
-
-
-function fetchProduct(barcode){
-    fetch(`/fetch-product/${barcode}`)
-    .then(response =>{
-        if(!response.ok) throw new Error('Product not found')
-        return response.json();
-    })
-    .then((data)=>{
-        if(data.status == "success")
-            window.location.href = window.location.oeiin
-        else
-            alert(data.message);
-    })
-    .catch(err=>{
-        console.error(err);
-        alert('Product not found');
-    })
-}

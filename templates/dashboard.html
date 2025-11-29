@@ -5,16 +5,19 @@
 <link rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}">
 <link rel="stylesheet" href="{{url_for('static',filename='css/dashboard.css')}}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 
 {%endblock%}
 
 {%block js %}
 <script src="{{url_for('static',filename='js/dashboard.js')}}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 {%endblock%}
 
 {%block content%}
-
-
+{%include 'menu.html'%}
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <div class="flashes container mt-3">
@@ -39,7 +42,7 @@
 
 {%endif%}
 
-<div class="product-actions">
+<div class="product-actions hidden">
   <button id="assignBtn" class="btn btn-assign" aria-label="Assign product to category">
     <i class="fa fa-exchange-alt" aria-hidden="true"></i>
     <span>Ανάθεση προϊόντος σε Κατηγορία</span>
@@ -50,6 +53,43 @@
     <span>Διαγραφή Προϊόντος</span>
   </button>
 </div>
+
+<div class="modal fade" id="filterModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <form id="filterForm">   <!-- <<< WRAP EVERYTHING HERE -->
+
+        <div class="modal-header">
+          <h5 class="modal-title">Φίλτρα</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="actions-container">
+
+            <div class="categories-container">
+              <label for="category" class="form-label">Κατηγορίες</label>
+              <select name="category" id="category" class="form-select">
+                {% for id, name in categories.items() %}
+                <option value="{{ id }}">{{ name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Apply Filters</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
 
 
 <div class="modal fade" id="assignModal" tabindex="-1">
@@ -65,7 +105,7 @@
 
         <div class="modal-body">
           <label class="form-label">{{ form.categories.label.text }}</label>
-          {{ form.categories(class="form-select") }}
+          {{ form.categories(id='category-assign', class="form-select") }}
 
           <input type="hidden" name="barcodes" id="modal-barcodes">
         </div>
@@ -79,54 +119,26 @@
   </div>
 </div>
 
-<nav id="sidebarMenu" class="sidebar">
-    <div class="sidebar__header">
-        <h3>Μενού Δράσεων</h3>
-    </div>
-
-    <ul class="sidebar__actions">
-        <li>
-            <a href="{{ url_for('product.register_product') }}" class="sidebar__btn">
-                <i class="fa fa-plus-circle"></i> Νέο Προϊόν
-            </a>
-        </li>
-        <li>
-            <a href="{{ url_for('category.register_category') }}" class="sidebar__btn">
-                <i class="fa fa-tags"></i> Νέα Κατηγορία
-            </a>
-        </li>
-        <li>
-          
-        </li>
-        <li>
-            <a href="{{ url_for('category.categories') }}" class="sidebar__btn">
-                <i class="fa fa-list"></i> Κατηγορίες
-            </a>
-        </li>
-        <li>
-            <div class="barcode-searcher">
-                <input type="text" id="barcode" class="sidebar__input" placeholder="Αναζήτηση Barcode" required>
-                <button type="button" class="sidebar__search-btn">
-                    <i class="fa fa-search"></i>
-                </button>
-            </div>
-        </li>
-        <li>
-          <div class="warning-container">
-            <i class="fa fa-warning"></i>
-            <span class="warning-info"></span>
-          </div>
-        </li>
-    </ul>
-</nav>
 
 
+<div class="actions-wrapper">
+      <div class="filters" id="filters">
+        <i class="fa fa-filter"></i>
+      </div>
+
+      <div class="barcode-searcher" id="barcodeSearch">
+          <input type="text" id="barcode" class="input" placeholder="Αναζήτηση Barcode" required>
+          <button type="button" class="search-btn">
+              <i class="fa fa-search"></i>
+          </button>
+      </div>
+</div>
 
 <div class="table-container">
-    <table class="modern-table">
+    <table class="modern-table" id="productTable">
         <thead>
             <tr>
-                <th><input type="checkbox" id="selectAll"></th>
+                <th><input type="checkbox" id="selectAll" name="barcodes" class="product-checkbox"></th>
                 <th>BARCODE</th>
                 <th>ΠΕΡΙΓΡΑΦΗ</th>
                 <th>ΑΠΟΘΕΜΑ</th>
@@ -136,44 +148,23 @@
             </tr>
         </thead>
         <tbody>
-            {% for product in products %}
+            {%for product in products%}
             <tr>
                 <td>
-                    <input type="checkbox" value="{{ product.barcode }}" name="barcodes" class="product-checkbox">
+                  <input type="checkbox" name="barcodes" value="{{product.barcode}}" class="product-checkbox">
                 </td>
-                <td>{{ product.barcode }}</td>
-                <td>{{ product.desc }}</td>
-                <td>{{ product.stock }}</td>
-                <td>{{ product.price }}</td>
-                <td>{{ product.date_updated }}</td>
-                <td>{{ product.category.cat_type | default('-') }}</td>
+                <td>{{product.barcode}}</td>
+                <td>{{product.desc}}</td>
+                <td>{{product.stock}}</td>
+                <td>{{product.price}}€</td>
+                <td>{{product.date_updated.strftime('%Y-%m-%d') if product.date_updated else '-'}}</td>
+                <td>{{product.category.cat_type if product.category else '-'}}</td>
             </tr>
-            {% endfor %}
+            {%endfor%}
         </tbody>
     </table>
 </div>
 
-
-<div id="assignModal" class="modal hidden" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form id="assignForm">
-        {{ form.hidden_tag() }}
-        <div class="modal-header">
-          <h5 class="modal-title">Assign Selected Products</h5>
-        </div>
-        <div class="modal-body">
-          {{ form.categories.label }}
-          {{ form.categories() }}
-          <input type="hidden" name="barcodes" id="modal-barcodes">
-        </div>
-        <div class="modal-footer">
-          {{ form.submit(class="btn btn-primary") }}
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
 
 {%include 'pagination.html'%}
 

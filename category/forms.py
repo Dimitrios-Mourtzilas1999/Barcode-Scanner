@@ -2,7 +2,6 @@ from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired
 from wtforms import StringField,SubmitField,SelectField
 from models import Category
-from extensions import db
 
 class RegisterCategoryForm(FlaskForm):
 

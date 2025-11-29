@@ -2,9 +2,9 @@ from flask import render_template, redirect, url_for,request
 from flask import Flask,jsonify
 from flask_migrate import Migrate
 from extensions import db, login_manager
-from models import User, Product
+from models import Category, User, Product
 from category.forms import AssignProductForm
-from utils.helper import paginate
+from utils.helper import get_categories, paginate
 import sys, os
 import pymysql
 
@@ -55,15 +55,54 @@ def index():
     return redirect(url_for("auth.login"))
 
 
+@app.route('/api/barcodes')
+def barcodes():
+    query = request.args.get('q', '')
+    results = (
+        Product.query
+        .filter(Product.barcode.like(f'%{query}%'))
+        .limit(10)
+        .all()
+    )
+    barcodes_list = [p.barcode for p in results]
+    return jsonify(barcodes_list)
+
+
+@app.route("/api/products")
+def api_products():
+    products = Product.query.all()
+    data = []
+    for p in products:
+        data.append({
+            "select": f'<input type="checkbox" name="barcodes" value="{p.barcode}" class="product-checkbox">',
+            "barcode": p.barcode,
+            "desc": p.desc,
+            "stock": p.stock,
+            "price": p.price,
+            "updated": p.date_updated.strftime('%Y-%m-%d') if p.date_updated else '-',
+            "category": p.category.cat_type if p.category else '-'
+        })
+    return jsonify({"data": data})  # <-- wrap in "data"
+
+
 @app.route("/dashboard", methods=["GET", "POST"])
 def dashboard():
     products = db.session.query(Product).all()
     page = request.args.get('page',1,type=int)
     query = Product.query.order_by(Product.date_updated.desc())
     products,page,pages,total = paginate(query,page,per_page=20)
-    print(products)
+    categories = get_categories()
     form = AssignProductForm()
-    return render_template("dashboard.html", products=products,form=form,items=products,page=page,pages=pages,total=total)
+    context = {
+        'form':form,
+        'products':products,
+        'page':page,
+        'pages':pages,
+        'total':total,
+        'products':products,
+        'categories':categories
+    }
+    return render_template("dashboard.html", **context)
 
 
 @app.route('/fetch-product/<int:barcode>',methods=["POST"])

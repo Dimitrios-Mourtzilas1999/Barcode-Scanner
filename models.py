@@ -29,6 +29,18 @@ class Product(db.Model):
     date_created = db.Column(db.DateTime, default=datetime.now)
     cat_id = db.Column(db.Integer,db.ForeignKey('category.id'),nullable=True)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'barcode': self.barcode,
+            'desc': self.desc,
+            'stock': self.stock,
+            'price': self.price,
+            'category': self.category.cat_type if self.category else None,
+            'date_updated': self.date_updated.strftime('%Y-%m-%d') if self.date_updated else None
+        }
+
+
     def __repr__(self):
         return f"Generated QR Code {self.id} - {self.barcode}"
 
