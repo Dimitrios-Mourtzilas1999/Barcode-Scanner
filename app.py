@@ -68,47 +68,48 @@ def barcodes():
     return jsonify(barcodes_list)
 
 
-@app.route("/api/products")
-def api_products():
-    products = Product.query.all()
-    data = []
-    for p in products:
-        data.append({
-            "select": f'<input type="checkbox" name="barcodes" value="{p.barcode}" class="product-checkbox">',
-            "barcode": p.barcode,
-            "desc": p.desc,
-            "stock": p.stock,
-            "price": p.price,
-            "updated": p.date_updated.strftime('%Y-%m-%d') if p.date_updated else '-',
-            "category": p.category.cat_type if p.category else '-'
-        })
-    return jsonify({"data": data})  # <-- wrap in "data"
-
 @app.route("/dashboard", methods=["GET", "POST"])
 def dashboard():
-    barcode = request.args.get("barcode", "").strip()
-    page = request.args.get('page', 1, type=int)
-
-    # Base query
+    page = request.args.get("page", 1, type=int)
     query = Product.query.order_by(Product.date_updated.desc())
+    
+    print(request.args)
+    # Map relationship query params to related model attributes
+    relationship_fields = {
+        'category': 'cat_type',  # query param 'category' filters Category.cat_type
+    }
 
-    # Apply barcode filter if provided
-    if barcode:
-        query = query.filter(Product.barcode == barcode)
+    for key, value in request.args.items():
+        if not value or key == 'page':
+            continue
 
+        if hasattr(Product, key):
+            column = getattr(Product, key)
+
+            # Detect relationship
+            if hasattr(column.property, 'direction'):  # relationship
+                rel_attr_name = relationship_fields.get(key)
+                if rel_attr_name:
+                    query = query.filter(column.has(**{rel_attr_name: value}))
+            else:
+                query = query.filter(column == value)
+
+    # Pagination
     products, page, pages, total = paginate(query, page, per_page=5)
+
+    # Additional context
     categories = get_categories()
     form = AssignProductForm()
 
-    context = {
-        'form': form,
-        'products': products,
-        'page': page,
-        'pages': pages,
-        'total': total,
-        'categories': categories
-    }
-    return render_template("dashboard.html", **context)
+    return render_template(
+        "dashboard.html",
+        form=form,
+        products=products,
+        page=page,
+        pages=pages,
+        total=total,
+        categories=categories,
+    )
 
 @app.route('/fetch-product/<int:barcode>',methods=["POST"])
 def fetch_product(barcode):

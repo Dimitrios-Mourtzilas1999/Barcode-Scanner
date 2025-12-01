@@ -14,50 +14,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterForm = document.querySelector('#filterForm');
     const categorySelect = document.querySelector('#category');
     const resetBtn = document.querySelector('#resetFilters');
-    const searchBtn = document.getElementById('barcodeSearchBtn')
+    const savedBarcode = localStorage.getItem('barcode');
 
-    searchBtn.addEventListener('click', () => {
-        const barcode = barcodeInput.value.trim();
-        if (!barcode) return;
-
-        // Dynamically redirect to the search URL with the barcode
-        window.location.href = `/dashboard?barcode=${encodeURIComponent(barcode)}`;
-    });
+    if (savedBarcode) {
+        barcodeInput.value = savedBarcode;
+        localStorage.removeItem('barcode');
+    }
 
     resetBtn.addEventListener('click', () => {
-        // 1️⃣ Reset the select box to default
-        filterForm.reset(); // resets category to first option
+        // 1️⃣ Reset the form fields
+        filterForm.reset();
 
-        // 2️⃣ Show all rows
-        Array.from(tbody.querySelectorAll('tr')).forEach(row => {
-            row.style.display = '';
-        });
+        // 2️⃣ Redirect to dashboard without query parameters
+        window.location.href = '/dashboard';
 
-        // 3️⃣ Close modal
+        // 3️⃣ Close the modal (optional if using Bootstrap modal)
         const filterModal = bootstrap.Modal.getInstance(document.querySelector('#filterModal'));
-        filterModal.hide();
+        if (filterModal) filterModal.hide();
     });
 
     filterForm.addEventListener('submit', (e) => {
-        e.preventDefault(); // prevent form submission
+        e.preventDefault(); // prevent default form submission
 
-        const selectedCategory = categorySelect.value.trim().toLowerCase();
+        // Get selected filter values
+        const selectedCategory = categorySelect.value.trim();
+        const selectedBarcode = barcodeInput ? barcodeInput.value.trim() : '';
 
-        Array.from(tbody.querySelectorAll('tr')).forEach(row => {
-            const categoryCell = row.children[6]; // 7th column (index 6)
-            const categoryText = categoryCell.innerText.trim().toLowerCase();
+        // Build URL with query parameters
+        const params = new URLSearchParams();
 
-            if (selectedCategory === '' || categoryText === selectedCategory) {
-                row.style.display = ''; // show row
-            } else {
-                row.style.display = 'none'; // hide row
-            }
-        });
+        if (selectedCategory) params.append('category', selectedCategory);
+        if (selectedBarcode) params.append('barcode', selectedBarcode);
 
-    // Close modal after applying filter
-        const filterModalEl = document.querySelector('#filterModal');
-        const filterModal = bootstrap.Modal.getInstance(filterModalEl);
-        filterModal.hide();
+        // Redirect to dashboard with filters applied
+        window.location.href = `/dashboard?${params.toString()}`;
     });
 
 
