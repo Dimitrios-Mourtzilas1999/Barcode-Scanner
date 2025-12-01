@@ -1,5 +1,5 @@
-from flask import render_template, redirect, url_for,request
-from flask import Flask,jsonify
+from flask import render_template, redirect, url_for, request
+from flask import Flask, jsonify
 from flask_migrate import Migrate
 from extensions import db, login_manager
 from models import Category, User, Product
@@ -35,7 +35,6 @@ def create_app():
     app.register_blueprint(product_blueprint)
     app.register_blueprint(category_blueprint)
 
-
     Migrate(app, db)
 
     return app
@@ -55,15 +54,10 @@ def index():
     return redirect(url_for("auth.login"))
 
 
-@app.route('/api/barcodes')
+@app.route("/api/barcodes")
 def barcodes():
-    query = request.args.get('q', '')
-    results = (
-        Product.query
-        .filter(Product.barcode.like(f'%{query}%'))
-        .limit(10)
-        .all()
-    )
+    query = request.args.get("q", "")
+    results = Product.query.filter(Product.barcode.like(f"%{query}%")).limit(10).all()
     barcodes_list = [p.barcode for p in results]
     return jsonify(barcodes_list)
 
@@ -72,22 +66,22 @@ def barcodes():
 def dashboard():
     page = request.args.get("page", 1, type=int)
     query = Product.query.order_by(Product.date_updated.desc())
-    
+
     print(request.args)
     # Map relationship query params to related model attributes
     relationship_fields = {
-        'category': 'cat_type',  # query param 'category' filters Category.cat_type
+        "category": "cat_type",  # query param 'category' filters Category.cat_type
     }
 
     for key, value in request.args.items():
-        if not value or key == 'page':
+        if not value or key == "page":
             continue
 
         if hasattr(Product, key):
             column = getattr(Product, key)
 
             # Detect relationship
-            if hasattr(column.property, 'direction'):  # relationship
+            if hasattr(column.property, "direction"):  # relationship
                 rel_attr_name = relationship_fields.get(key)
                 if rel_attr_name:
                     query = query.filter(column.has(**{rel_attr_name: value}))
@@ -111,12 +105,14 @@ def dashboard():
         categories=categories,
     )
 
-@app.route('/fetch-product/<int:barcode>',methods=["POST"])
+
+@app.route("/fetch-product/<int:barcode>", methods=["POST"])
 def fetch_product(barcode):
     product = Product.query.filter(Product.barcode == barcode).first()
     if not product:
-        return jsonify({'status':'error','message':'Product not found'})
-    return jsonify({'status':'success','info':product})
+        return jsonify({"status": "error", "message": "Product not found"})
+    return jsonify({"status": "success", "info": product})
+
 
 if __name__ == "__main__":
 

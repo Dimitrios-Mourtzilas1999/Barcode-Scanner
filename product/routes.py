@@ -1,4 +1,12 @@
-from flask import jsonify, render_template, redirect, url_for, request, flash, current_app
+from flask import (
+    jsonify,
+    render_template,
+    redirect,
+    url_for,
+    request,
+    flash,
+    current_app,
+)
 from sqlalchemy.exc import SQLAlchemyError
 from .forms import ProductRegistrationForm, ProductEditForm
 from extensions import db
@@ -13,7 +21,7 @@ productbp = Blueprint(
     __name__,
     url_prefix="/product",
     static_folder="static",
-    static_url_path='/static',
+    static_url_path="/static",
     template_folder="templates",
 )
 
@@ -29,12 +37,18 @@ def register_product():
             .first()
         )
         if product:
-            flash('Το προϊόν υπάρχει ήδη','danger')
+            flash("Το προϊόν υπάρχει ήδη", "danger")
             return redirect(url_for("dashboard"))
         else:
-            
+
             try:
-                product = Product(barcode=form.barcode.data,desc=form.desc.data,stock=form.stock.data,price=form.price.data,image_file=form.image.data)
+                product = Product(
+                    barcode=form.barcode.data,
+                    desc=form.desc.data,
+                    stock=form.stock.data,
+                    price=form.price.data,
+                    image_file=form.image.data,
+                )
                 db.session.add(product)
                 db.session.commit()
                 return redirect(url_for("dashboard"))
@@ -46,21 +60,42 @@ def register_product():
 
     return render_template("register_product.html", form=form)
 
+
 @productbp.route("/edit", methods=["GET", "POST"])
 def edit_product():
-    barcode = request.args.get('barcode')
-    product = Product.query.filter_by(barcode=barcode).first()
+    form = ProductEditForm()
 
-    if not product:
-        flash("Product not found", "error")
-        return redirect(url_for("productbp.list_products"))
+    # On GET, get barcode from query params to prefill the form
+    if request.method == "GET":
+        barcode = request.args.get("barcode", type=int)
+        if barcode is None:
+            flash("No barcode provided", "error")
+            return redirect(url_for("dashboard"))
 
-    form = ProductEditForm(obj=product)
+        product = Product.query.filter_by(barcode=barcode).first()
+        if not product:
+            flash("Product not found", "error")
+            return redirect(url_for("dashboard"))
 
+        # Prepopulate the form with product data
+        form = ProductEditForm(obj=product)
+
+    # On POST, get barcode from the hidden field
     if form.validate_on_submit():
+        barcode = form.barcode.data
+        product = Product.query.filter_by(barcode=barcode).first()
+        if not product:
+            flash("Product not found", "error")
+            return redirect(url_for("dashboard"))
+
+        # Update product from form
         form.populate_obj(product)
-        db.session.commit()
-        flash("Product updated successfully!", "success")
+        try:
+            db.session.commit()
+            flash("Product updated successfully!", "success")
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Failed to update product: {str(e)}", "error")
         return redirect(url_for("dashboard"))
 
     return render_template("edit_product.html", form=form)
@@ -78,24 +113,28 @@ def upload_file():
             return redirect(url_for("uploaded_file", filename=filename))
     return render_template("upload.html")
 
-@productbp.route('/delete',methods=["POST"])
+
+@productbp.route("/delete", methods=["POST"])
 def delete():
 
     data = request.get_json()
     if not data:
-        return jsonify({'status':'error','message':'Could not read data'}),400
-    
-    barcodes = data.get('barcodes', [])
+        return jsonify({"status": "error", "message": "Could not read data"}), 400
+
+    barcodes = data.get("barcodes", [])
     products = Product.query.filter(Product.barcode.in_(barcodes)).all()
 
     try:
         for product in products:
             db.session.delete(product)
         db.session.commit()
-        flash('Επιτυχης διαγραφη','success')
+        flash("Επιτυχης διαγραφη", "success")
     except SQLAlchemyError as e:
         print(f"[ERROR]: {e}")
-        flash('Πρόβλημα κατά την διαδικασία','danger')
+        flash("Πρόβλημα κατά την διαδικασία", "danger")
         db.session.rollback()
-        return jsonify({'status':'error','message':'Operation could not be completed'}),400
-    return jsonify({'status':'success','message':'Successfull operation'}),200
+        return (
+            jsonify({"status": "error", "message": "Operation could not be completed"}),
+            400,
+        )
+    return jsonify({"status": "success", "message": "Successfull operation"}), 200
