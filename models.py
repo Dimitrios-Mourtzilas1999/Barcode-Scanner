@@ -28,6 +28,9 @@ class Product(db.Model):
     date_updated = db.Column(db.DateTime, default=datetime.now)
     date_created = db.Column(db.DateTime, default=datetime.now)
     cat_id = db.Column(db.Integer,db.ForeignKey('category.id'),nullable=True)
+    supplier_id = db.Column(db.Integer,db.ForeignKey('suppliers.id'),nullable=True)
+    category = db.relationship('Category', backref='products', lazy=True)
+    supplier = db.relationship('Supplier', backref='products', lazy=True)
 
     def to_dict(self):
         return {
@@ -61,4 +64,14 @@ class Category(db.Model):
     __table_args__ = {'extend_existing':True}
     id = db.Column(db.Integer(),primary_key = True,autoincrement=True)
     cat_type = db.Column(db.String(100))
-    product = db.relationship('Product', backref='category', lazy=True)
+
+
+class Supplier(db.Model):
+    __tablename__ = "suppliers"
+    __table_args__ = {"extend_existing": True}
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=True)
+    phone = db.Column(db.String(100), nullable=True)
+
+    

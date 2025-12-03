@@ -1,6 +1,6 @@
 
 from typing import OrderedDict
-from models import Category
+from models import Category, Supplier
 from math import ceil
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
@@ -30,3 +30,10 @@ def paginate(query, page, per_page=20):
 
     return items, page, pages, total
 
+
+
+def get_suppliers():
+    empty_choice = (None, '----')
+    items = [(s.id, s.name) for s in Supplier.query.all()]
+    items.sort(key=lambda x: x[1])   # sort by name
+    return OrderedDict([empty_choice] + items)

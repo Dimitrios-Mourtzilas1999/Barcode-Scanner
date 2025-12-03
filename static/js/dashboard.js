@@ -15,6 +15,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const categorySelect = document.querySelector('#category');
     const resetBtn = document.querySelector('#resetFilters');
     const savedBarcode = localStorage.getItem('barcode');
+    const filtersSubmit= document.querySelector('.apply-filters');
+    console.log(filtersSubmit);
+
+    filtersSubmit.addEventListener('click', async (e) => {
+        e.preventDefault(); // prevent default form submission
+
+        const data = {
+            category: categorySelect.value,
+            barcode: barcodeInput.value
+        };
+
+        try {
+            const response = await fetch('/filters', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            console.log(result);
+            // optionally update the page with results
+        } catch (err) {
+            console.error('Error:', err);
+        }
+    });
+
 
     if (savedBarcode) {
         barcodeInput.value = savedBarcode;

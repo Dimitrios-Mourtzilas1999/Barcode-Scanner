@@ -2,9 +2,10 @@ from flask import render_template, redirect, url_for, request
 from flask import Flask, jsonify
 from flask_migrate import Migrate
 from extensions import db, login_manager
-from models import Category, User, Product
+from models import User, Product
+from sqlalchemy.orm import class_mapper
 from category.forms import AssignProductForm
-from utils.helper import get_categories, paginate
+from utils.helper import get_categories, get_suppliers, paginate
 import sys, os
 import pymysql
 
@@ -93,6 +94,7 @@ def dashboard():
 
     # Additional context
     categories = get_categories()
+    suppliers = get_suppliers()
     form = AssignProductForm()
 
     return render_template(
@@ -103,7 +105,23 @@ def dashboard():
         pages=pages,
         total=total,
         categories=categories,
+        suppliers=suppliers,
     )
+
+
+@app.route('/filters', methods=['POST'])
+def filters():
+    data = request.get_json()
+    if not data:
+        return jsonify({'status': 'error', 'message': 'Could not read data'}), 400
+
+    query = Product.query
+
+
+    results = query.all()
+    products = [p.to_dict() for p in results]
+
+    return jsonify({'status': 'success', 'results': products})
 
 
 @app.route("/fetch-product/<int:barcode>", methods=["POST"])
@@ -112,7 +130,6 @@ def fetch_product(barcode):
     if not product:
         return jsonify({"status": "error", "message": "Product not found"})
     return jsonify({"status": "success", "info": product})
-
 
 if __name__ == "__main__":
 

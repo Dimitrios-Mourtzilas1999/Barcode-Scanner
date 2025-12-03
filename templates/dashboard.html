@@ -58,7 +58,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
 
-      <form id="filterForm"> 
+      <form id="filterForm" method="POST"> 
 
         <div class="modal-header">
           <h5 class="modal-title">Φίλτρα</h5>
@@ -82,11 +82,19 @@
                   <i class="fa fa-search"></i>
               </a> -->
             </div>
+            <div class="suppliers">
+              <label for="supplier" class="form-label">Προμηθευτές</label>
+              <select name="supplier" id="supplier" class="form-select">
+                {% for id, name in suppliers.items() %}
+                <option value="{{ id }}">{{ name }}</option>
+                {% endfor %}
+              </select>
+            </div>
           </div>
         </div>
 
         <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">Apply Filters</button>
+          <button type="button" class="btn btn-primary apply-filters">Apply Filters</button>
           <button type="button" class="btn btn-warning" id="resetFilters">Reset Filters</button>
 
         </div>
@@ -133,7 +141,6 @@
         <i class="fa fa-filter"></i>
       </div>
 
- 
 </div>
 
 <div class="table-container">
@@ -147,6 +154,7 @@
               <th data-sort="price">ΤΙΜΗ <span class="sort-icon"></span></th>
               <th data-sort="updated">ΕΝΗΜΕΡΩΘΗΚΕ <span class="sort-icon"></span></th>
               <th data-sort="category">ΚΑΤΗΓΟΡΙΑ <span class="sort-icon"></span></th>                
+              <th data-sort="supplier">ΠΡΟΜΗΘΕΥΤΗΣ <span class="sort-icon"></span></th>                
             </tr>
         </thead>
         <tbody>
@@ -163,6 +171,7 @@
                 <td>{{product.price}}€</td>
                 <td>{{product.date_updated.strftime('%Y-%m-%d') if product.date_updated else '-'}}</td>
                 <td>{{product.category.cat_type if product.category else '-'}}</td>
+                <td>{{product.supplier_id if product.supplier else '-'}}</td>
             </tr>
             {%endfor%}
         </tbody>
