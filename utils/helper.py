@@ -1,6 +1,7 @@
 
 from typing import OrderedDict
 from models import Category, Supplier
+from sqlalchemy import Integer, Float, String
 from math import ceil
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
@@ -37,3 +38,4 @@ def get_suppliers():
     items = [(s.id, s.name) for s in Supplier.query.all()]
     items.sort(key=lambda x: x[1])   # sort by name
     return OrderedDict([empty_choice] + items)
+

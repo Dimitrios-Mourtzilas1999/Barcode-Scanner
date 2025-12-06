@@ -16,15 +16,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetBtn = document.querySelector('#resetFilters');
     const savedBarcode = localStorage.getItem('barcode');
     const filtersSubmit= document.querySelector('.apply-filters');
-    console.log(filtersSubmit);
+
 
     filtersSubmit.addEventListener('click', async (e) => {
         e.preventDefault(); // prevent default form submission
 
-        const data = {
-            category: categorySelect.value,
-            barcode: barcodeInput.value
-        };
+        const form = document.querySelector('#filterForm');
+        const data = {};
+
+        form.querySelectorAll('input, select, textarea').forEach(field => {
+            if (!field.value) return; // skip empty fields
+
+            const type = fieldTypes[field.name] || 'string';
+            let value = field.value;
+            console.log(field.value);
+            // Convert value according to type
+            if (type === 'int') {
+                value = parseInt(value);
+                if (isNaN(value)) return; // skip invalid numbers
+            } else if (type === 'float') {
+                value = parseFloat(value);
+                if (isNaN(value)) return;
+            } else {
+                value = value.trim(); // string
+            }
+
+            data[field.name] = value;
+        });
 
         try {
             const response = await fetch('/filters', {
@@ -35,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
             console.log(result);
-            // optionally update the page with results
+            // Optionally update the page with results
         } catch (err) {
             console.error('Error:', err);
         }

@@ -2,12 +2,11 @@ from flask import render_template, redirect, url_for, request
 from flask import Flask, jsonify
 from flask_migrate import Migrate
 from extensions import db, login_manager
-from models import User, Product
-from sqlalchemy.orm import class_mapper
+from models import Category, Supplier, User, Product
 from category.forms import AssignProductForm
-from utils.helper import get_categories, get_suppliers, paginate
 import sys, os
 import pymysql
+from utils.helper import get_categories,get_suppliers, paginate
 
 
 pymysql.install_as_MySQLdb()
@@ -108,22 +107,33 @@ def dashboard():
         suppliers=suppliers,
     )
 
-
 @app.route('/filters', methods=['POST'])
 def filters():
     data = request.get_json()
     if not data:
-        return jsonify({'status': 'error', 'message': 'Could not read data'}), 400
+        return jsonify({'status': 'error','message':'Could not read data'}), 400
 
     query = Product.query
 
+    for key, value in data.items():
+        if not value:
+            continue
+
+        if key == "category":
+            query = query.join(Category, Product.cat_id == Category.id) \
+                         .filter(Category.cat_type.ilike(f"%{value}%"))
+        elif key == "supplier":
+            query = query.join(Supplier, Product.supplier_id == Supplier.id) \
+                         .filter(Supplier.name.ilike(f"%{value}%"))
+        elif hasattr(Product, key):
+            col = getattr(Product, key)
+            query = query.filter(col == value)
 
     results = query.all()
     products = [p.to_dict() for p in results]
 
-    return jsonify({'status': 'success', 'results': products})
-
-
+    return jsonify({'status':'success','results':products})
+ 
 @app.route("/fetch-product/<int:barcode>", methods=["POST"])
 def fetch_product(barcode):
     product = Product.query.filter(Product.barcode == barcode).first()

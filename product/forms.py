@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, SubmitField
+from wtforms import  StringField, IntegerField, SubmitField
 from wtforms.validators import DataRequired, Length
 from flask_wtf.file import FileField, FileAllowed
+
 
 
 class ProductRegistrationForm(FlaskForm):
