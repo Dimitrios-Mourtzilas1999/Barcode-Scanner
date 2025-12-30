@@ -55,7 +55,7 @@
 </div>
 
 
-<div class="filters-modal hidden" id="filtersModal">
+<div class="filters-modal" id="filtersModal">
     <input type="text" name="barcode" id="barcode-input" placeholder="Αναζητηση κωδικού" value="{{request.form.barcode if request.method == 'POST' else ''}}">
     {%for category in categories %}
         <div class="form-check form-check-inline">
@@ -66,26 +66,26 @@
     <button type="submit" class="btn btn-primary apply-filters">Αναζητηση</button>
 </div>
 
-<div class="modal fade" id="assignModal" tabindex="-1">
+<div class="modal fade" id="assignModal" tabindex="-1" aria-labelledby="assignModalLabel" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form id="assignForm" method="POST" action="{{ url_for('category.assign_to_category') }}">
+      <form id="assignForm" method="POST">
         {{ form.hidden_tag() }}
 
         <div class="modal-header">
-          <h5 class="modal-title">Ανάθεση Προϊόντων σε Κατηγορία</h5>
+          <h5 class="modal-title" id="assignModalLabel">Ανάθεση Προϊόντων σε Κατηγορία</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
         <div class="modal-body">
-          <label class="form-label">{{ form.categories.label.text }}</label>
+          <label class="form-label" for="category-assign">{{ form.categories.label.text }}</label>
           {{ form.categories(id='category-assign', class="form-select") }}
 
           <input type="hidden" name="barcodes" id="modal-barcodes">
         </div>
 
         <div class="modal-footer">
-          {{ form.submit(class="btn btn-primary") }}
+          {{ form.submit(id="assignSubmit", type="submit") }}
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Άκυρο</button>
         </div>
       </form>
@@ -95,11 +95,13 @@
 
 
 
-
 <div id="Main_Table" class="app">
 <table id="dashboard">
     <thead id="table-header">
         <tr style="user-select: none;">
+            <th>
+              <input type="checkbox" id="selectAll" style="cursor: pointer;" class="select-all">
+            </th>
             <th>A.A</th>
             <th>
                 <div class="sort-div">
@@ -163,14 +165,15 @@
         {% for product in products %}
         {% set indx = loop.index0 + 1 %}
         <tr>
+            <td ><input type="checkbox" name="barcodes" value="{{ product.barcode }}" id="barcode" class="barcode"></td>
             <td data-field="aa">{{ indx }}</td>
             <td data-field="barcode"><a href="{{ url_for('product.edit_product', barcode=product.barcode) }}">{{ product.barcode }}</a></td>
             <td data-field="desc">{{ product.desc }}</td>
             <td data-field="stock">{{ product.stock }}</td>
             <td data-field="price">{{ product.price }}</td>
-            <td data-field="updated_at">{{ product.updated_at if product.updated_at else '' }}</td>
-            <td data-field="category">{{ product.category.cat_type if product.category else '' }}</td>
-            <td data-field="supplier">{{ product.supplier.name if product.supplier else '' }}</td>
+            <td data-field="updated_at">{{ product.date_updated if product.date_updated else '-' }}</td>
+            <td data-field="category">{{ product.category.cat_type if product.category else '-' }}</td>
+            <td data-field="supplier">{{ product.supplier.name if product.supplier else '-' }}</td>
         </tr>
         {% endfor %}
     </tbody>

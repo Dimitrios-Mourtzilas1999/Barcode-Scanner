@@ -25,33 +25,29 @@
     z-index: 10;
 }
 
-/* Header cells and sorting buttons */
-#dashboard th {
+/* Header and body cells */
+#dashboard th, 
+#dashboard td {
     padding: 0.75rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid #e0e0e0;
     font-size: 0.95rem;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
 }
 
+/* Sorting wrapper */
 .sort-div {
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
+/* Sorting buttons */
 .sort-icon {
     background: none;
     border: none;
     cursor: pointer;
     padding: 0;
     margin-left: 0.5rem;
-}
-
-/* Table body cells */
-#dashboard td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #e0e0e0;
-    font-size: 0.95rem;
 }
 
 /* Zebra striping */
@@ -62,6 +58,11 @@
 /* Hover effect */
 #dashboard tbody tr:hover {
     background-color: #f1f5f9;
+}
+
+/* Selected row highlight */
+#dashboard tbody tr.selected {
+    background-color: #d0ebff; /* light blue highlight */
 }
 
 /* Checkboxes inside table */
@@ -78,14 +79,14 @@
     justify-content: center;
 }
 
-/* SVG checkmark (optional) */
+/* SVG checkmark */
 .checkbox-wrapper-31 svg {
     width: 1rem;
     height: 1rem;
 }
 
-.filters{
-    display: block;
+/* Filter button */
+.filters {
     width: 3rem;
     height: 3rem;
     border-radius: 10%;
@@ -96,27 +97,31 @@
     align-items: center;
     cursor: pointer;
     transition: all 0.3s ease-in-out;
-    position: relative ;
+    position: relative;
     top: 11px;
     left: 15px;
 }
 
-.filters:hover{
+/* Filter button hover */
+.filters:hover {
     background-color: #fff;
     color: #2c3e50;
-    transition: all 0.3s ease-in-out;
 }
 
+/* Filter modal */
 .filters-modal {
     opacity: 0;
-    visibility: hidden;
     display: flex; /* keep flex layout */
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-.filters-modal.active {
-    opacity: 1;
-    visibility: visible;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    visibility: hidden;
 }

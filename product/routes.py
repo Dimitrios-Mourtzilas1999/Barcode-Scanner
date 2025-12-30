@@ -1,3 +1,4 @@
+import datetime
 from flask import (
     jsonify,
     render_template,
@@ -47,6 +48,7 @@ def register_product():
                     desc=form.desc.data,
                     stock=form.stock.data,
                     price=form.price.data,
+                    date_created=datetime.datetime.now(),
                     image_file=form.image.data,
                 )
                 db.session.add(product)
@@ -91,6 +93,7 @@ def edit_product():
         # Update product from form
         form.populate_obj(product)
         try:
+            product.date_updated = datetime.datetime.now()
             db.session.commit()
             flash("Product updated successfully!", "success")
         except Exception as e:
