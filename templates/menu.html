@@ -1,9 +1,5 @@
 {% extends "base.html" %}
 
-{%block js %}
-<script src="{{url_for('static',filename='js/menu.js')}}"></script>
-{%endblock%}
-
 {%block css %}
 <link rel="stylesheet" href="{{url_for('static',filename='css/menu.css')}}">
 {%endblock%}
@@ -41,6 +37,12 @@
             </a>
         </li>
     </ul>
+    <div class="user-info">
+        <i class="fa fa-user"></i> {{current_user.username}}
+        <a class="btn sign-out-btn" href="{{url_for('auth.logout')}}">
+            <i class="fa fa-sign-out">Αποσύνδεση</i>
+        </a>
+    </div>
 </nav>
 
 {% endblock %}

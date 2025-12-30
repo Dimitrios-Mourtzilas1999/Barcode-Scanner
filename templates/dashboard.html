@@ -4,23 +4,18 @@
 {%block css %}
 <link rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}">
 <link rel="stylesheet" href="{{url_for('static',filename='css/dashboard.css')}}">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 {%endblock%}
 
 {%block js %}
 <script src="{{url_for('static',filename='js/dashboard.js')}}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 {%endblock%}
 
 {%block content%}
 {%include 'menu.html'%}
+
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <div class="flashes container mt-3">
@@ -34,9 +29,6 @@
   {% endif %}
 {% endwith %}
 
-
-
-{%include 'user-nav.html'%}
 
 {%if message %}
 <div class="message">
@@ -57,7 +49,13 @@
   </button>
 </div>
 
-<div class="filters-modal" id="filtersModal">
+
+<div class="filters" id="filters">
+  <i class="fa fa-filter"></i>
+</div>
+
+
+<div class="filters-modal hidden" id="filtersModal">
     <input type="text" name="barcode" id="barcode-input" placeholder="Αναζητηση κωδικού" value="{{request.form.barcode if request.method == 'POST' else ''}}">
     {%for category in categories %}
         <div class="form-check form-check-inline">
@@ -97,109 +95,88 @@
 
 
 
-<div class="actions-wrapper">
-      <div class="filters" id="filters">
-        <i class="fa fa-filter"></i>
-      </div>
 
-</div>
-
-                <div id="Main_Table" class="app">
-            <table id="dashboard">
-                    <thead id="table-header">
-                        <tr style="user-select: none;">
-                            <th>
-                                <div class="checkbox-wrapper-31">
-                                    <input type="checkbox" id="main-input">
-                                    <svg viewBox="0 0 35.6 35.6">
-                                    <circle class="background" cx="17.8" cy="17.8" r="17.8"></circle>
-                                    <circle class="stroke" cx="17.8" cy="17.8" r="14.37"></circle>
-                                    <polyline class="check" points="11.78 18.12 15.55 22.23 25.17 12.87"></polyline>
-                                    </svg>
-                                </div>
-                            </th>
-                            <th >A.A</th>
-                            <th>
-                                <div id="" class="sort-div">
-                                    Barcode
-                                        <button id="sort_barcode_paralavis" class="btn sort-icon" onclick="sortRecords(this)">
-                                                <i class="fa-solid fa-sort "></i>
-                                        </button>
-                                </div> 
-                            </th>
-                            <th>
-                                <div id="" class="sort-div">
-                                    ΠΕΡΙΓΡΑΦΗ ΠΡΟΪΟΝΤΟΣ
-                                        <button id="sort_rgs_name" class="btn sort-icon" onclick="sortRecords(this)">
-                                                <i class="fa-solid fa-sort "></i>
-                                        </button>
-                                </div> 
-                            </th>
-                            <th>ΑΠΟΘΕΜΑ</th>
-                            <!-- <th>ΤΟΜΟΣ</th> -->
-                             <th>
-                                <div id="" class="sort-div">
-                                    ΤΙΜΗ
-                                        <button id="sort_volume" class="btn sort-icon" onclick="sortRecords(this)">
-                                                <i class="fa-solid fa-sort "></i>
-                                        </button>
-                                </div>
-                            </th>
-                            <th>
-                                <div id="" class="sort-div">
-                                    ΕΝΗΜΕΡΩΘΗΚΕ
-                                        <button id="sort_collect_date" class="btn sort-icon" onclick="sortRecords(this)">
-                                                <i class="fa-solid fa-sort "></i>
-                                        </button>
-                                </div> 
-                            </th>
-                            <th>
-                                <div id="" class="sort-div">
-                                    ΚΑΤΗΓΟΡΙΑ
-                                        <button id="sort_collect_date" class="btn sort-icon" onclick="sortRecords(this)">
-                                                <i class="fa-solid fa-sort "></i>
-                                        </button>
-                                </div> 
-                            </th>
-                            <th>
-                                <div id="" class="sort-div">
-                                    ΠΡΟΜΗΘΕΥΤΗΣ
-                                        <button id="sort_collect_date" class="btn sort-icon" onclick="sortRecords(this)">
-                                                <i class="fa-solid fa-sort "></i>
-                                        </button>
-                                </div> 
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="names">
-                        {% for product in products %}
-
-                            {% set indx =  loop.index0 + 1 %}
-
-                      <tr id="hover-element">
-                        <td>
-                            <div class="checkbox-wrapper-31">
-                                <input class="barcode" type="checkbox" value="{{product.barcode}}" id="barcode-checkbox">
-                                <svg viewBox="0 0 35.6 35.6">
-                                <circle class="background" cx="17.8" cy="17.8" r="17.8"></circle>
-                                <circle class="stroke" cx="17.8" cy="17.8" r="14.37"></circle>
-                                <polyline class="check" points="11.78 18.12 15.55 22.23 25.17 12.87"></polyline>
-                                </svg>
-                            </div>
-                        </td>
-                        <td>{{indx}}</td>
-                        <td><a href="{{url_for('product.edit_product', brcd=product.barcode)}}">{{product.barcode}}</a></td>
-                        <td>{{product.desc}}</td>
-                        <td>{{product.price}}</td>
-                        <td>{{product.stock}}</td>
-                        <td>{{product.updated_at if product.updated_at else ''}}</td>
-                        <td>{{product.supplier.name if product.supplier else ''}}</td>
-                        <td>{{product.category.cat_type if product.category else ''}}</td>
-                      </tr>
-                        {% endfor %}
-                    </tbody>
-                    </table>
+<div id="Main_Table" class="app">
+<table id="dashboard">
+    <thead id="table-header">
+        <tr style="user-select: none;">
+            <th>A.A</th>
+            <th>
+                <div class="sort-div">
+                    Barcode
+                    <button id="barcode" class="btn sort-icon">
+                        <i class="fa-solid fa-sort"></i>
+                    </button>
+                </div> 
+            </th>
+            <th>
+                <div class="sort-div">
+                    ΠΕΡΙΓΡΑΦΗ ΠΡΟΪΟΝΤΟΣ
+                    <button id="desc" class="btn sort-icon">
+                        <i class="fa-solid fa-sort"></i>
+                    </button>
+                </div> 
+            </th>
+            <th>
+                <div class="sort-div">
+                    ΑΠΟΘΕΜΑ
+                    <button id="stock" class="btn sort-icon">
+                        <i class="fa-solid fa-sort"></i>
+                    </button>
                 </div>
+            </th>
+            <th>
+                <div class="sort-div">
+                    ΤΙΜΗ
+                    <button id="price" class="btn sort-icon">
+                        <i class="fa-solid fa-sort"></i>
+                    </button>
+                </div>
+            </th>
+            <th>
+                <div class="sort-div">
+                    ΕΝΗΜΕΡΩΘΗΚΕ
+                    <button id="updated_at" class="btn sort-icon">
+                        <i class="fa-solid fa-sort"></i>
+                    </button>
+                </div> 
+            </th>
+            <th>
+                <div class="sort-div">
+                    ΚΑΤΗΓΟΡΙΑ
+                    <button id="category" class="btn sort-icon">
+                        <i class="fa-solid fa-sort"></i>
+                    </button>
+                </div> 
+            </th>
+            <th>
+                <div class="sort-div">
+                    ΠΡΟΜΗΘΕΥΤΗΣ
+                    <button id="supplier" class="btn sort-icon">
+                        <i class="fa-solid fa-sort"></i>
+                    </button>
+                </div> 
+            </th>
+        </tr>
+    </thead>
+    <tbody id="names">
+        {% for product in products %}
+        {% set indx = loop.index0 + 1 %}
+        <tr>
+            <td data-field="aa">{{ indx }}</td>
+            <td data-field="barcode"><a href="{{ url_for('product.edit_product', barcode=product.barcode) }}">{{ product.barcode }}</a></td>
+            <td data-field="desc">{{ product.desc }}</td>
+            <td data-field="stock">{{ product.stock }}</td>
+            <td data-field="price">{{ product.price }}</td>
+            <td data-field="updated_at">{{ product.updated_at if product.updated_at else '' }}</td>
+            <td data-field="category">{{ product.category.cat_type if product.category else '' }}</td>
+            <td data-field="supplier">{{ product.supplier.name if product.supplier else '' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+  </div>
 
 
 {%include 'pagination.html'%}

@@ -1,53 +1,88 @@
-
-/* Sidebar hidden by default (off screen) */
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: -250px; /* hidden off-screen */
-    width: 250px;
-    height: 100%;
-    background-color:#007bff;
-    color: #fff;
-    transition: left 0.3s ease;
-    z-index: 1000;
-    overflow-y: auto;
-    padding-top: 20px;
+/* Sidebar container */
+#sidebarMenu {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 100px;
+  background-color: #2c3e50;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
-.sidebar__header h3 {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 1.2rem;
+/* Optional header section */
+.sidebar__header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60px;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.sidebar__btn {
+/* Sidebar actions list */
+.sidebar__actions {
     display: flex;
-    align-items: center;
-    padding: 10px 20px;
-    color: #fff;
-    text-decoration: none;
-    font-size: 0.95rem;
-    transition: background 0.3s ease;
-    border: none;
     width: 100%;
-    text-align: left;
+    flex-direction: row;
+    justify-content: center;
+    gap: 0.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+/* Individual buttons */
+.sidebar__btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: #ecf0f1;
+  background-color: transparent;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
 }
 
 .sidebar__btn:hover {
-    background-color: #333;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Icons */
+.sidebar__btn i {
+  font-size: 1.2rem;
 }
 
 
-.barcode-searcher {
-    width: 60%;
-    position: relative;
-    left: 1%;
-    top: 7px;
+.hidden{
+    display: none;
 }
 
-
-.sidebar__actions{
-    list-style: none;
-
+.sign-out-btn{
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: #ecf0f1;
+    background-color: transparent;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
 }
 
+.user-info{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  color: #ecf0f1;
+  margin-left: auto;
+}
+
+.sign-out-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  
+}
