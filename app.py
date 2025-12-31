@@ -63,104 +63,38 @@ def barcodes():
     return jsonify(barcodes_list)
 
 
-@app.route("/apply_filters", methods=["POST"])
-def apply_filters():
+@app.route("/filters", methods=["POST"])
+def filters():
+    data = request.get_json()
+    if not data:
+        return jsonify({"status": "error", "message": "Could not read data"}), 400
 
-    data = request.form
-    print(data)
-    return jsonify({"status": "success"})
+    products = Product.query
+    print(products.all())
+    barcode = data.get("barcode")
+    category = data.get("category")
+    supplier = data.get("supplier")
 
+    print(barcode, category, supplier)
 
-@app.route("/products", methods=["POST"])
-def products():
-    req = request.get_json()
+    if barcode:
+        products = products.filter(Product.barcode == barcode)
 
-    # Draw, start, length from DataTables
-    draw = req.get("draw", 1)
-    start = req.get("start", 0)
-    length = req.get("length", 10)
+    if category:
+        products = products.filter(Product.cat_id == category)
 
-    filters = req.get("filters", {})
+    if supplier:
+        products = products.filter(Product.supplier_id == supplier)
 
-    # Base query
-    query = (
-        db.session.query(Product)
-        .outerjoin(Product.category)
-        .outerjoin(Product.supplier)
-    )
-
-    # ----------------------------
-    # Apply filters
-    # ----------------------------
-    conditions = []
-    if filters.get("barcode"):
-        conditions.append(Product.barcode.ilike(f"%{filters['barcode']}%"))
-    if filters.get("category"):
-        conditions.append(Category.cat_type.ilike(f"%{filters['category']}%"))
-    if filters.get("supplier"):
-        conditions.append(Supplier.name.ilike(f"%{filters['supplier']}%"))
-
-    if conditions:
-        query = query.filter(and_(*conditions))
-
-    # Total rows before filtering
-    recordsTotal = db.session.query(Product).count()
-    # Total rows after filtering
-    recordsFiltered = query.count()
-
-    # ----------------------------
-    # Ordering
-    # ----------------------------
-    order = req.get("order", [])
-    # Map DataTables columns to SQLAlchemy columns
-    column_map = {
-        1: Product.barcode,
-        2: Product.desc,
-        3: Product.stock,
-        4: Product.price,
-        5: Product.date_updated,
-        6: Category.cat_type,
-        7: Supplier.name,
-    }
-    if order:
-        col_idx = order[0]["column"]
-        direction = order[0]["dir"]
-        col_attr = column_map.get(col_idx)
-        if col_attr is not None:
-            query = query.order_by(
-                col_attr.asc() if direction == "asc" else col_attr.desc()
-            )
-
-    # ----------------------------
-    # Pagination
-    # ----------------------------
-    rows = query.offset(start).limit(length).all()
-
-    # ----------------------------
-    # Build response
-    # ----------------------------
-    data = []
-    for p in rows:
-        data.append(
-            {
-                "barcode": p.barcode,
-                "desc": p.desc,
-                "stock": p.stock,
-                "price": float(p.price) if p.price else 0,
-                "updated": (
-                    p.date_updated.strftime("%Y-%m-%d") if p.date_updated else "-"
-                ),
-                "category": p.category.cat_type if p.category else "-",
-                "supplier": p.supplier.name if p.supplier else "-",
-            }
-        )
-
+    products, page, pages, total = paginate(products, 1, per_page=5)
+    print(products)
     return jsonify(
         {
-            "draw": draw,
-            "recordsTotal": recordsTotal,
-            "recordsFiltered": recordsFiltered,
-            "data": data,
+            "status": "success",
+            "products": [p.to_dict() for p in products],
+            "total": total,
+            "pages": pages,
+            "page": page,
         }
     )
 
@@ -169,65 +103,22 @@ def products():
 def dashboard():
     page = request.args.get("page", 1, type=int)
     query = Product.query.order_by(Product.date_updated.desc())
-    
-    
-    # Pagination
-    products, page, pages, total = paginate(query, page, per_page=5)
-
-    # Additional context
-    categories = get_categories()
-    suppliers = get_suppliers()
     form = AssignProductForm()
 
+    categories = Category.query.all()
+    suppliers = Supplier.query.all()
+    total = Product.query.count()
+    products, page, pages, total = paginate(query, page, per_page=5)
     return render_template(
         "dashboard.html",
-        form=form,
         products=products,
         page=page,
         pages=pages,
         total=total,
         categories=categories,
         suppliers=suppliers,
+        form=form,
     )
-
-
-@app.route("/filters", methods=["POST"])
-def filters():
-    data = request.get_json()
-    if not data:
-        return jsonify({"status": "error", "message": "Could not read data"}), 400
-
-    query = Product.query
-
-    joined = set()
-
-    for key, value in data.items():
-        if value is None or value == "":
-            continue
-
-        print(key, value)
-
-        if key == "category":
-            if "category" not in joined:
-                query = query.outerjoin(Category, Product.cat_id == Category.id)
-                joined.add("category")
-            query = query.filter(Category.cat_type.ilike(f"%{value}%"))
-
-        elif key == "supplier":
-            if "supplier" not in joined:
-                query = query.outerjoin(Supplier, Product.supplier_id == Supplier.id)
-                joined.add("supplier")
-            query = query.filter(Supplier.name.ilike(f"%{value}%"))
-
-        elif hasattr(Product, key):
-            col = getattr(Product, key)
-            query = query.filter(col == value)
-
-    results = query.all()
-    print(results)
-    products = [p.to_dict() for p in results]
-
-    return jsonify({"status": "success", "results": products})
 
 
 @app.route("/fetch-product/<int:barcode>", methods=["POST"])

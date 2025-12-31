@@ -1,163 +1,125 @@
 document.addEventListener('DOMContentLoaded', () => {
     // ===== ELEMENTS =====
     const table = document.querySelector('#dashboard');
+    const tableBody = table.querySelector('tbody');
     const assignForm = document.querySelector('#assignForm');
     const modalBarcodesInput = document.querySelector('#modal-barcodes');
     const productActions = document.getElementById('productActions');
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-    const filterBtn = document.querySelector('.filters');
-    const filterModal = new window.bootstrap.Modal(document.getElementById('filtersModal'));
+    const selectAll = document.querySelector('#selectAll');
+    const assignModal = new bootstrap.Modal(document.getElementById('assignModal'));
     const assignBtn = document.querySelector('#assignBtn');
-    const filters = document.querySelector('#filters');
-    const assignModal =new window.bootstrap.Modal(document.getElementById('assignModal'));
     const deleteBtn = document.querySelector('.btn-delete');
-    const filterInputs = {
-        barcode: document.querySelector('#filter-barcode'),
-        desc: document.querySelector('#filter-desc'),
-        category: document.querySelector('#filter-category'),
-        supplier: document.querySelector('#filter-supplier')
-    };
+    const filterBtn = document.querySelector('.filters');
+    const filterModalEl = document.getElementById('filtersModal');
+    const closeBtn = filterModalEl?.querySelector('.close');
+    const filtersApplyBtn = filterModalEl?.querySelector('.apply-filters');
+    const paginationEl = document.querySelector('.pagination');
 
-    filters.addEventListener('click', () => {
-        filterModal.show();
+    // ===== EVENT LISTENERS =====
+    assignBtn?.addEventListener('click', () => assignModal.show());
+    filterBtn?.addEventListener('click', () => filterModalEl.classList.add('active'));
+    closeBtn?.addEventListener('click', () => filterModalEl.classList.remove('active'));
+
+    selectAll?.addEventListener('change', (e) => {
+        tableBody.querySelectorAll('input.barcode').forEach(cb => cb.checked = e.target.checked);
+        updateSelectedRows();
     });
 
-    deleteBtn.addEventListener('click', () => {
-        const selectedBarcodes = Array.from(table.querySelectorAll('tbody input.barcode:checked'))
-            .map(cb => cb.value);
+    tableBody.addEventListener('change', e => {
+        if (e.target.matches('input.barcode')) updateSelectedRows();
+    });
 
-        console.log(selectedBarcodes);
-        if (!selectedBarcodes.length) {
-            alert("Please select at least one product!");
-            return;
-        }
+    assignForm?.addEventListener('submit', e => {
+        e.preventDefault();
+        const selected = Array.from(tableBody.querySelectorAll('input.barcode:checked')).map(cb => cb.value);
+        if (!selected.length) { e.preventDefault(); alert("Please select at least one product!"); return; }
+        modalBarcodesInput.value = selected.join(',');
+    });
+
+    deleteBtn?.addEventListener('click', () => {
+        const selected = Array.from(tableBody.querySelectorAll('input.barcode:checked')).map(cb => cb.value);
+        if (!selected.length) return alert("Please select at least one product!");
         fetch('/product/delete', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ barcodes: selectedBarcodes })
-        }).then(response => {
-            if (response.ok) {
-                location.reload();
-            } else {
-                throw new Error('Failed to delete products');
-            }
-        }).catch(error => {
-            console.error(error);            
-        })
-        })
-
-
-    assignBtn.addEventListener('click', () => {
-        assignModal.show();
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ barcodes: selected })
+        }).then(res => res.ok ? location.reload() : alert('Failed to delete'));
     });
 
-    checkboxes.forEach(cb => {
-        cb.addEventListener('change', (e) => {
-            const isSelectAll = e.target.id === "selectAll";
-
-            // Handle selectAll checkbox
-            if (isSelectAll) {
-                checkboxes.forEach(box => {
-                    if (box.id !== "selectAll") {
-                        box.checked = e.target.checked;
-                    }
-                });
-            }
-
-            // Count how many checkboxes (except selectAll) are checked
-            const checkedCount = Array.from(checkboxes)
-                .filter(box => box.id !== "selectAll" && box.checked).length;
-
-            // Show modal if at least one checkbox is checked, hide if none
-            if (checkedCount > 0) {
-                productActions.classList.remove('hidden');
-            } else {
-                productActions.classList.toggle('hidden');
-            }
-        });
+    filtersApplyBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        fetchFilteredProducts(1);  // page 1 when applying new filters
+        filterModalEl.classList.remove('active');
     });
 
-    // ===== ASSIGN FORM SUBMISSION =====
-    assignForm.addEventListener('submit', (e) => {
-        const selectedBarcodes = Array.from(table.querySelectorAll('tbody input.barcode:checked'))
-            .map(cb => cb.value);
-
-        if (!selectedBarcodes.length) {
-            e.preventDefault();
-            alert("Please select at least one product!");
-            return;
-        }
-
-        modalBarcodesInput.value = selectedBarcodes.join(',');
-        // Form submits normally (POST)
-    });
-    
-    
-    
-    
-
-    // ===== TABLE SORTING =====
-    table?.addEventListener('click', e => {
-        const button = e.target.closest('.sort-icon');
-        if (!button) return;
-        sortRecords(button);
-    });
-
-    function sortRecords(button) {
-        const field = button.id;
-        const tbody = table.tBodies[0];
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-        const asc = button.dataset.asc !== "true";
-        button.dataset.asc = asc;
-
-        rows.sort((a, b) => {
-            const cellA = a.querySelector(`[data-field="${field}"]`)?.textContent.trim().toLowerCase() || '';
-            const cellB = b.querySelector(`[data-field="${field}"]`)?.textContent.trim().toLowerCase() || '';
-
-            if (!isNaN(cellA) && !isNaN(cellB) && cellA && cellB) {
-                return asc ? cellA - cellB : cellB - cellA;
-            }
-            return asc ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
-        });
-
-        rows.forEach(row => tbody.appendChild(row));
-
-        // Update icons
-        table.querySelectorAll('.sort-icon i').forEach(i => i.className = 'fa-solid fa-sort');
-        const icon = button.querySelector('i');
-        icon.className = asc ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down';
+    // ===== FUNCTIONS =====
+    function updateSelectedRows() {
+        const selectedRows = Array.from(tableBody.querySelectorAll('input.barcode:checked'));
+        productActions.classList.toggle('hidden', selectedRows.length === 0);
+        assignBtn.disabled = deleteBtn.disabled = selectedRows.length === 0;
     }
 
-    // ===== TABLE FILTERING =====
-    Object.values(filterInputs).forEach(input => {
-        input?.addEventListener('input', filterTable);
-    });
+    async function fetchFilteredProducts(page = 1) {
+        // Collect filter values
+        const filters = {};
+        Array.from(filterModalEl.querySelectorAll('input, select')).forEach(input => {
+            if (input.name && input.value) filters[input.name] = input.value;
+        });
+        filters.page = page;
 
-    function filterTable() {
-        const tbody = table.tBodies[0];
-        if (!tbody) return;
+        const response = await fetch('/filters', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(filters)
+        });
+        const data = await response.json();
+        renderTable(data.products);
+        renderPagination(data.page, data.pages);
+    }
 
-        const barcodeValue = filterInputs.barcode?.value.trim().toLowerCase() || '';
-        const descValue = filterInputs.desc?.value.trim().toLowerCase() || '';
-        const categoryValue = filterInputs.category?.value.trim().toLowerCase() || '';
-        const supplierValue = filterInputs.supplier?.value.trim().toLowerCase() || '';
+    function renderTable(products) {
+        tableBody.innerHTML = "";
+        products.forEach((p, i) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td><input type="checkbox" class="barcode" value="${p.barcode}"></td>
+                <td>${i + 1}</td>
+                <td><a href="/product/edit/${p.barcode}">${p.barcode}</a></td>
+                <td>${p.desc}</td>
+                <td>${p.stock}</td>
+                <td>${p.price}</td>
+                <td>${p.updated_at}</td>
+                <td>${p.category}</td>
+                <td>${p.supplier}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+        updateSelectedRows();
+    }
 
-        tbody.querySelectorAll('tr').forEach(row => {
-            const cells = row.cells;
-            const barcodeCell = cells[1]?.textContent.trim().toLowerCase() || '';
-            const descCell = cells[2]?.textContent.trim().toLowerCase() || '';
-            const categoryCell = cells[6]?.textContent.trim().toLowerCase() || '';
-            const supplierCell = cells[7]?.textContent.trim().toLowerCase() || '';
+    function renderPagination(current, totalPages) {
+        paginationEl.innerHTML = "";
+        if (totalPages <= 1) return;
 
-            const show =
-                barcodeCell.includes(barcodeValue) &&
-                descCell.includes(descValue) &&
-                categoryCell.includes(categoryValue) &&
-                supplierCell.includes(supplierValue);
-
-            row.style.display = show ? '' : 'none';
+     const addPageItem = (label, disabled, callback) => {
+    const li = document.createElement("li");
+    li.className = `page-item ${disabled ? "disabled" : ""}`;
+    li.innerHTML = `<a class="page-link" href="#">${label}</a>`;
+    if (!disabled) {
+        li.querySelector("a").addEventListener("click", (e) => {
+            e.preventDefault();   // <-- prevent page reload
+            callback();
         });
     }
+    paginationEl.appendChild(li);
+};
+
+    addPageItem("«", current === 1, () => fetchFilteredProducts(current - 1));
+    for (let i = 1; i <= totalPages; i++) {
+        addPageItem(i, false, () => fetchFilteredProducts(i));
+    }
+    addPageItem("»", current === totalPages, () => fetchFilteredProducts(current + 1));
+
+}
+
 });

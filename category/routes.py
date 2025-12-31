@@ -48,26 +48,42 @@ def get_categories():
     return jsonify({"status": "success", "category": category})
 
 
-@categorybp.route("/assign-to-category", methods=["POST"])
+@categorybp.route("/assign_to_category", methods=["POST"])
 def assign_to_category():
+    barcodes = [
+        b.strip() for b in request.form.get("barcodes", "").split(",") if b.strip()
+    ]
+    category_id = request.form.get("categories")
+    print(barcodes, category_id)
+    if not barcodes:
+        flash("Δεν επιλέξατε προϊόντα!", "warning")
+        return redirect(url_for("dashboard"))
 
-    data = request.get_json()
-    print(data)
-    barcodes = request.form.get("barcodes", "").split(",")
-    category_id = request.form.get("category_id")
-    print(f"category_id: {category_id}")
-    category = Category.query.filter(Category.id == category_id).first()
+    if not category_id:
+        flash("Δεν επιλέξατε κατηγορία!", "warning")
+        return redirect(url_for("dashboard"))
+
+    category = Category.query.filter_by(id=int(category_id)).first()
+    if not category:
+        flash("Η κατηγορία δεν βρέθηκε!", "error")
+        return redirect(url_for("dashboard"))
+
     products = Product.query.filter(Product.barcode.in_(barcodes)).all()
-    print([p.id for p in products])
+    if not products:
+        flash("Δεν βρέθηκαν προϊόντα για ενημέρωση.", "warning")
+        return redirect(url_for("dashboard"))
+
     try:
-        for p in products:
-            p.cat_id = category.id
+        db.session.query(Product).filter(
+            Product.id.in_([p.id for p in products])
+        ).update({"cat_id": category.id}, synchronize_session=False)
         db.session.commit()
+
     except DatabaseError as e:
-        print(f"[ERROR]: {e}")
         db.session.rollback()
-        flash("Αποτυχία διαδικασία καταχώρησης", "error")
-        redirect(url_for("dashboard"))
+        print(f"[ERROR]: {e}")
+        flash("Αποτυχία διαδικασίας καταχώρησης", "error")
+        return redirect(url_for("dashboard"))
 
     flash(
         f"Επιτυχής καταχώρηση προϊόντων στην κατηγορία {category.cat_type}", "success"
