@@ -3,8 +3,8 @@ from flask import Flask, jsonify
 from flask_migrate import Migrate
 from sqlalchemy import and_
 from extensions import db, login_manager
-from models import Category, Supplier, User, Product
-from category.forms import AssignProductForm
+from models import User, Product
+from forms import AssignProductForm
 import sys, os
 import pymysql
 from utils.helper import get_categories, get_suppliers, paginate
@@ -31,10 +31,12 @@ def create_app():
     from auth import authbp as auth_blueprint
     from product.routes import productbp as product_blueprint
     from category.routes import categorybp as category_blueprint
+    from supplier.routes import supplierbp as supplier_blueprint
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(product_blueprint)
     app.register_blueprint(category_blueprint)
+    app.register_blueprint(supplier_blueprint)
 
     Migrate(app, db)
 
@@ -105,8 +107,8 @@ def dashboard():
     query = Product.query.order_by(Product.date_updated.desc())
     form = AssignProductForm()
 
-    categories = Category.query.all()
-    suppliers = Supplier.query.all()
+    categories = get_categories()
+    suppliers = get_suppliers()
     total = Product.query.count()
     products, page, pages, total = paginate(query, page, per_page=5)
     return render_template(

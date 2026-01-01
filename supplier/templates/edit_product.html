@@ -1,0 +1,44 @@
+{% extends "base.html"%}
+
+
+
+{%block content %}
+
+{%if form %}
+
+<form action="{{url_for('product.edit_product')}}" method="post">
+
+    
+    {{ form.hidden_tag() }}
+    {{ form.barcode(type="hidden") }}
+
+
+    <div class="mb-3">
+        {{ form.barcode.label(class="form-label") }}
+        {{ form.barcode(class="form-control") }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.desc.label(class="form-label") }}
+        {{ form.desc(class="form-control") }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.price.label(class="form-label") }}
+        {{ form.price(class="form-control") }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.stock.label(class="form-label") }}
+        {{ form.stock(class="form-control") }}
+    </div>
+
+
+    <div class="text-center">
+        {{ form.submit(class="btn btn-primary px-4") }}
+    </div>
+
+</form>
+
+{%endif%}
+{%endblock%}

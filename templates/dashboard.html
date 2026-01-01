@@ -40,8 +40,9 @@
 <div class="product-actions hidden" id="productActions">
   <button id="assignBtn" class="btn btn-assign" aria-label="Assign product to category">
     <i class="fa fa-exchange-alt" aria-hidden="true"></i>
-    <span>Ανάθεση προϊόντος σε Κατηγορία</span>
+    <span>Ανάθεση προϊόντος</span>
   </button>
+
 
   <button class="btn btn-delete" aria-label="Delete product">
     <i class="fa fa-trash" aria-hidden="true"></i>
@@ -64,6 +65,15 @@
         <select name="category" id="category-select">
           {%for category in categories %}
             <option value="{{ category.id }}">{{ category.cat_type }}
+            </option>
+          {%endfor%}
+        </select>
+      </div>
+      <div class="supplier-wrapper">
+        <label for="supplier">Προμηθευτής</label>
+        <select name="supplier" id="supplier-select">
+          {%for supplier in suppliers %}
+            <option value="{{ supplier.id }}">{{ supplier.cat_type }}
             </option>
           {%endfor%}
         </select>
@@ -90,7 +100,7 @@
         {{ form.hidden_tag() }}
 
         <div class="modal-header">
-          <h5 class="modal-title" id="assignModalLabel">Ανάθεση Προϊόντων σε Κατηγορία</h5>
+          <h5 class="modal-title" id="assignModalLabel">Ανάθεση Προϊόντων</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
@@ -98,11 +108,14 @@
           <label class="form-label" for="category-assign">{{ form.categories.label.text }}</label>
           {{ form.categories(id='category-assign', class="form-select") }}
 
+          <label class="form-label" for="supplier-assign">{{form.suppliers.label.text}}</label>
+          {{form.suppliers(id='supplier-assign',class='form-select')}}
+          
           <input type="hidden" name="barcodes" id="modal-barcodes">
         </div>
 
         <div class="modal-footer">
-          {{ form.submit(id="assignSubmit", type="submit") }}
+          {{ form.submit }}
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Άκυρο</button>
         </div>
       </form>
@@ -182,13 +195,16 @@
         {% for product in products %}
         {% set indx = loop.index0 + 1 %}
         <tr>
-            <td><input type="checkbox" name="barcodes" value="{{product.barcode}}"></td>
+            <td><input type="checkbox" name="barcodes" value="{{product.barcode}}" class="barcode"></td>
             <td>{{ indx }}</td>
-            <td>{{ product.barcode }}</td>
+            <td><a href="{{url_for('product.edit_product',barcode=product.barcode)}}">
+               {{product.barcode }}
+            </a>
+             </td>
             <td>{{ product.desc }}</td>
             <td>{{ product.stock }}</td>
             <td>{{ product.price }}</td>
-            <td>{{ product.date_updaterd }}</td>
+            <td>{{ product.date_updated if product.date_updated else '-'}}</td>
             <td>{{ product.category.cat_type if product.category else '-' }}</td>
             <td>{{ product.supplier.name  if product.supplier else '-'}}</td>
         </tr>

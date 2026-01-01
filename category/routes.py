@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash
-from .forms import RegisterCategoryForm, AssignProductForm
+from .forms import RegisterCategoryForm
 from sqlalchemy.exc import DatabaseError, SQLAlchemyError
 from models import Category, Product
 from extensions import db
@@ -55,9 +55,7 @@ def assign_to_category():
     ]
     category_id = request.form.get("categories")
     print(barcodes, category_id)
-    if not barcodes:
-        flash("Δεν επιλέξατε προϊόντα!", "warning")
-        return redirect(url_for("dashboard"))
+
 
     if not category_id:
         flash("Δεν επιλέξατε κατηγορία!", "warning")

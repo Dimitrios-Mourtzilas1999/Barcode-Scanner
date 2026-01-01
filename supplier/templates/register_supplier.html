@@ -1,0 +1,51 @@
+{%extends 'base.html' %}
+
+
+{%block css %}
+<link rel="stylesheet" href="{{url_for('static',filename='css/dashboard.css')}}">
+<link rel="stylesheet" href="{{url_for('product.static',filename='css/register_product.css')}}">
+
+{%endblock%}
+
+{%block content %}
+
+{%include 'menu.html'%}
+{%if form %}
+
+<form action="{{ url_for('supplier.register_supplier') }}" 
+      method="POST" 
+      enctype="multipart/form-data"
+      class="container p-4 mt-4 shadow rounded bg-white">
+
+    {{ form.hidden_tag() }}
+
+    <h4 class="mb-4 text-center">Register Supplier</h4>
+
+    <div class="mb-3">
+        {{ form.name.label(class="form-label fw-semibold") }}
+        {{ form.name(class="form-control", placeholder="Enter name") }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.email.label(class="form-label fw-semibold") }}
+        {{ form.email(class="form-control", placeholder="Email") }}
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            {{ form.phone.label(class="form-label fw-semibold") }}
+            {{ form.phone(class="form-control") }}
+        </div>
+
+    </div>
+
+    <div class="text-center mt-4">
+        {{ form.submit(class="btn btn-primary px-4 py-2") }}
+    </div>
+
+</form>
+
+
+{%endif%}
+
+{%endblock%}

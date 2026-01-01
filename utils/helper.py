@@ -15,6 +15,13 @@ def get_categories():
 
     return OrderedDict([empty_choice] + items)
 
+def get_suppliers():
+    empty_choice = (None, '----')
+    items = [(s.id, s.name) for s in Supplier.query.all()]
+    items.sort(key=lambda x: x[1])   # sort by name
+    return OrderedDict([empty_choice] + items)
+
+
 def paginate(query, page, per_page=20):
     """
     Paginate a SQLAlchemy query.
@@ -32,10 +39,4 @@ def paginate(query, page, per_page=20):
     return items, page, pages, total
 
 
-
-def get_suppliers():
-    empty_choice = (None, '----')
-    items = [(s.id, s.name) for s in Supplier.query.all()]
-    items.sort(key=lambda x: x[1])   # sort by name
-    return OrderedDict([empty_choice] + items)
 

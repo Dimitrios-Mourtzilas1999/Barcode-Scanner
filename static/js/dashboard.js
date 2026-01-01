@@ -25,12 +25,13 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSelectedRows();
     });
 
+
     tableBody.addEventListener('change', e => {
         if (e.target.matches('input.barcode')) updateSelectedRows();
     });
 
     assignForm?.addEventListener('submit', e => {
-        e.preventDefault();
+        // e.preventDefault();
         const selected = Array.from(tableBody.querySelectorAll('input.barcode:checked')).map(cb => cb.value);
         if (!selected.length) { e.preventDefault(); alert("Please select at least one product!"); return; }
         modalBarcodesInput.value = selected.join(',');
@@ -84,13 +85,13 @@ document.addEventListener('DOMContentLoaded', () => {
             row.innerHTML = `
                 <td><input type="checkbox" class="barcode" value="${p.barcode}"></td>
                 <td>${i + 1}</td>
-                <td><a href="/product/edit/${p.barcode}">${p.barcode}</a></td>
+                <td><a href="/product/edit?barcode=${p.barcode}">${p.barcode}</a></td>
                 <td>${p.desc}</td>
                 <td>${p.stock}</td>
                 <td>${p.price}</td>
-                <td>${p.updated_at}</td>
-                <td>${p.category}</td>
-                <td>${p.supplier}</td>
+                <td>${p.updated_at ?? '-'}</td>
+                <td>${p.category ?? '-'}</td>
+                <td>${p.supplier ?? '-'}</td>
             `;
             tableBody.appendChild(row);
         });
@@ -120,6 +121,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     addPageItem("»", current === totalPages, () => fetchFilteredProducts(current + 1));
 
+}
+
+
+const sortState = {};
+
+document.querySelectorAll('.sort-icon').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const columnMap = {
+            barcode: 2,
+            desc: 3,
+            stock: 4,
+            price: 5,
+            updated_at: 6,
+            category: 7,
+            supplier: 8
+        };
+
+        const colIndex = columnMap[btn.id];
+        if (colIndex === undefined) return;
+
+        const asc = sortState[btn.id] = !sortState[btn.id];
+        sortTable(colIndex, asc);
+    });
+});
+
+function sortTable(colIndex, asc = true) {
+    const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+    rows.sort((a, b) => {
+        let A = a.children[colIndex].innerText.trim();
+        let B = b.children[colIndex].innerText.trim();
+
+        const numA = parseFloat(A.replace(',', '.'));
+        const numB = parseFloat(B.replace(',', '.'));
+
+        if (!isNaN(numA) && !isNaN(numB)) {
+            return asc ? numA - numB : numB - numA;
+        }
+
+        return asc ? A.localeCompare(B) : B.localeCompare(A);
+    });
+
+    tableBody.innerHTML = '';
+    rows.forEach(row => tableBody.appendChild(row));
 }
 
 });
