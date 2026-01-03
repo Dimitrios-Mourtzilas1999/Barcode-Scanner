@@ -9,17 +9,10 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def get_categories():
-    empty_choice = (None, '----')
-    items = [(c.id, c.cat_type) for c in Category.query.all()]
-    items.sort(key=lambda x: x[1])   # sort by cat_type
-
-    return OrderedDict([empty_choice] + items)
+    return Category.query.order_by(Category.cat_type).all()
 
 def get_suppliers():
-    empty_choice = (None, '----')
-    items = [(s.id, s.name) for s in Supplier.query.all()]
-    items.sort(key=lambda x: x[1])   # sort by name
-    return OrderedDict([empty_choice] + items)
+    return Supplier.query.order_by(Supplier.name).all()
 
 
 def paginate(query, page, per_page=20):

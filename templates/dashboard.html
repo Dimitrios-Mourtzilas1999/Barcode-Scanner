@@ -57,40 +57,42 @@
 
 
 <div class="filters-modal" id="filtersModal">
-    <span class="close">&times;</span>
-    <form method="POST" class="filtersForm">
-      <input type="text" name="barcode" id="barcode-input" placeholder="Αναζητηση κωδικού" value="{{request.form.barcode if request.method == 'POST' else ''}}">
-      <div class="category-wrapper">
-        <label for="category">Κατηγορια</label>
-        <select name="category" id="category-select">
-          {%for category in categories %}
-            <option value="{{ category.id }}">{{ category.cat_type }}
-            </option>
-          {%endfor%}
-        </select>
-      </div>
-      <div class="supplier-wrapper">
-        <label for="supplier">Προμηθευτής</label>
-        <select name="supplier" id="supplier-select">
-          {%for supplier in suppliers %}
-            <option value="{{ supplier.id }}">{{ supplier.cat_type }}
-            </option>
-          {%endfor%}
-        </select>
-    
-      </div>
+  <span class="close">&times;</span>
 
-      <div class="supplier-wrapper">
-        <label for="supplier">Προμηθευτης</label>
-        <select name="supplier" id="supplier-select">
-        {%for supplier in suppliers %}
-        <option value="{{supplier.id}}">{{supplier.name}}</option>
-        {%endfor%}
-        </select>
-      </div>
+  <form class="filtersForm">
 
-      <button class="btn btn-primary apply-filters">Αναζητηση</button>
-    </form>
+    <input
+      type="text"
+      name="barcode"
+      id="barcode-input"
+      placeholder="Αναζήτηση κωδικού">
+
+    <div class="category-wrapper">
+      <label for="category-select">Κατηγορία</label>
+      <select name="category" id="category-select">
+        {% for category in categories %}
+          <option value="{{ category.id }}">{{ category.cat_type }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="supplier-wrapper">
+      <label for="supplier-select">Προμηθευτής</label>
+      <select name="supplier" id="supplier-select">
+        <option value="">Όλοι</option>
+        {% for supplier in suppliers %}
+          <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-primary apply-filters">
+      Αναζήτηση
+    </button>
+    <button type="button" class="btn btn-secondary clear-filters">Καθαρισμός</button>
+  </form>
 </div>
 
 <div class="modal fade" id="assignModal" tabindex="-1" aria-labelledby="assignModalLabel" data-bs-backdrop="static" data-bs-keyboard="false">
@@ -136,7 +138,7 @@
             <th>
                 <div class="sort-div">
                     Barcode
-                    <button id="barcode" class="btn sort-icon">
+                    <button id="barcode" class="btn sort-icon" data-order="desc">
                         <i class="fa-solid fa-sort"></i>
                     </button>
                 </div> 
@@ -144,7 +146,7 @@
             <th>
                 <div class="sort-div">
                     ΠΕΡΙΓΡΑΦΗ ΠΡΟΪΟΝΤΟΣ
-                    <button id="desc" class="btn sort-icon">
+                    <button id="desc" class="btn sort-icon" data-order="desc">
                         <i class="fa-solid fa-sort"></i>
                     </button>
                 </div> 
@@ -152,7 +154,7 @@
             <th>
                 <div class="sort-div">
                     ΑΠΟΘΕΜΑ
-                    <button id="stock" class="btn sort-icon">
+                    <button id="stock" class="btn sort-icon" data-order="desc">
                         <i class="fa-solid fa-sort"></i>
                     </button>
                 </div>
@@ -160,7 +162,7 @@
             <th>
                 <div class="sort-div">
                     ΤΙΜΗ
-                    <button id="price" class="btn sort-icon">
+                    <button id="price" class="btn sort-icon" data-order="desc">
                         <i class="fa-solid fa-sort"></i>
                     </button>
                 </div>
@@ -168,7 +170,7 @@
             <th>
                 <div class="sort-div">
                     ΕΝΗΜΕΡΩΘΗΚΕ
-                    <button id="updated_at" class="btn sort-icon">
+                    <button id="updated_at" class="btn sort-icon" data-order="desc">
                         <i class="fa-solid fa-sort"></i>
                     </button>
                 </div> 
@@ -176,7 +178,7 @@
             <th>
                 <div class="sort-div">
                     ΚΑΤΗΓΟΡΙΑ
-                    <button id="category" class="btn sort-icon">
+                    <button id="category" class="btn sort-icon" data-order="desc">
                         <i class="fa-solid fa-sort"></i>
                     </button>
                 </div> 
@@ -184,7 +186,7 @@
             <th>
                 <div class="sort-div">
                     ΠΡΟΜΗΘΕΥΤΗΣ
-                    <button id="supplier" class="btn sort-icon">
+                    <button id="supplier" class="btn sort-icon" data-order="desc">
                         <i class="fa-solid fa-sort"></i>
                     </button>
                 </div> 
@@ -193,7 +195,7 @@
     </thead>
     <tbody id="names">
         {% for product in products %}
-        {% set indx = loop.index0 + 1 %}
+            {% set indx = (page - 1) * 5 + loop.index %}
         <tr>
             <td><input type="checkbox" name="barcodes" value="{{product.barcode}}" class="barcode"></td>
             <td>{{ indx }}</td>

@@ -6,7 +6,6 @@ from flask import (
     url_for,
     request,
     flash,
-    current_app,
 )
 from sqlalchemy.exc import SQLAlchemyError
 from .forms import SupplierRegistrationForm, SupplierEditForm

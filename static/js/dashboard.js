@@ -1,170 +1,151 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ===== ELEMENTS =====
-    const table = document.querySelector('#dashboard');
-    const tableBody = table.querySelector('tbody');
+
+    const tableBody = document.querySelector('#dashboard tbody');
     const assignForm = document.querySelector('#assignForm');
     const modalBarcodesInput = document.querySelector('#modal-barcodes');
     const productActions = document.getElementById('productActions');
     const selectAll = document.querySelector('#selectAll');
-    const assignModal = new bootstrap.Modal(document.getElementById('assignModal'));
     const assignBtn = document.querySelector('#assignBtn');
     const deleteBtn = document.querySelector('.btn-delete');
+    const assignModal = new bootstrap.Modal(document.getElementById('assignModal'));
     const filterBtn = document.querySelector('.filters');
     const filterModalEl = document.getElementById('filtersModal');
     const closeBtn = filterModalEl?.querySelector('.close');
     const filtersApplyBtn = filterModalEl?.querySelector('.apply-filters');
-    const paginationEl = document.querySelector('.pagination');
+    const clearFiltersBtn = filterModalEl?.querySelector('.clear-filters');
+    const DEFAULT_SORT = 'date_updated';
+    const DEFAULT_ORDER = 'desc';
+    const params = new URLSearchParams(window.location.search);
 
-    // ===== EVENT LISTENERS =====
-    assignBtn?.addEventListener('click', () => assignModal.show());
+
+    const currentSort = params.get('sort') || DEFAULT_SORT;
+    const currentOrder = params.get('order') || DEFAULT_ORDER;
+
+
+
+    // ===== FILTER MODAL =====
     filterBtn?.addEventListener('click', () => filterModalEl.classList.add('active'));
     closeBtn?.addEventListener('click', () => filterModalEl.classList.remove('active'));
 
-    selectAll?.addEventListener('change', (e) => {
-        tableBody.querySelectorAll('input.barcode').forEach(cb => cb.checked = e.target.checked);
+    filtersApplyBtn?.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        const filters = {};
+        filterModalEl.querySelectorAll('input, select').forEach(el => {
+            if (el.name && el.value) filters[el.name] = el.value;
+        });
+        console.log(filters);
+
+        await fetch('/filters', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(filters)
+        });
+
+        window.location.href = '/dashboard';
+    });
+
+    clearFiltersBtn?.addEventListener('click', async () => {
+        await fetch('/clear-filters', { method: 'POST' });
+        window.location.href = '/dashboard';
+    });
+
+    // ===== SELECTION =====
+    selectAll?.addEventListener('change', e => {
+        tableBody.querySelectorAll('input.barcode')
+            .forEach(cb => cb.checked = e.target.checked);
         updateSelectedRows();
     });
 
-
-    tableBody.addEventListener('change', e => {
+    tableBody?.addEventListener('change', e => {
         if (e.target.matches('input.barcode')) updateSelectedRows();
     });
 
+
+
+    function updateSelectedRows() {
+        const selected = tableBody.querySelectorAll('input.barcode:checked').length;
+        productActions.classList.toggle('hidden', selected === 0);
+        assignBtn.disabled = deleteBtn.disabled = selected === 0;
+    }
+
+    assignBtn.addEventListener('click',()=>{
+        assignModal.show();
+
+    })
+
+    // ===== ASSIGN =====
     assignForm?.addEventListener('submit', e => {
-        // e.preventDefault();
-        const selected = Array.from(tableBody.querySelectorAll('input.barcode:checked')).map(cb => cb.value);
-        if (!selected.length) { e.preventDefault(); alert("Please select at least one product!"); return; }
+        const selected = [...tableBody.querySelectorAll('input.barcode:checked')]
+            .map(cb => cb.value);
+
+        if (!selected.length) {
+            e.preventDefault();
+            alert("Select at least one product");
+            return;
+        }
         modalBarcodesInput.value = selected.join(',');
     });
 
-    deleteBtn?.addEventListener('click', () => {
-        const selected = Array.from(tableBody.querySelectorAll('input.barcode:checked')).map(cb => cb.value);
-        if (!selected.length) return alert("Please select at least one product!");
-        fetch('/product/delete', {
+    // ===== DELETE =====
+    deleteBtn?.addEventListener('click', async () => {
+        const selected = [...tableBody.querySelectorAll('input.barcode:checked')]
+            .map(cb => cb.value);
+
+        if (!selected.length) return alert("Select products first");
+
+        const res = await fetch('/product/delete', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ barcodes: selected })
-        }).then(res => res.ok ? location.reload() : alert('Failed to delete'));
+        });
+
+        if (res.ok) location.reload();
+        else alert("Delete failed");
     });
-
-    filtersApplyBtn?.addEventListener('click', (e) => {
-        e.preventDefault();
-        fetchFilteredProducts(1);  // page 1 when applying new filters
-        filterModalEl.classList.remove('active');
-    });
-
-    // ===== FUNCTIONS =====
-    function updateSelectedRows() {
-        const selectedRows = Array.from(tableBody.querySelectorAll('input.barcode:checked'));
-        productActions.classList.toggle('hidden', selectedRows.length === 0);
-        assignBtn.disabled = deleteBtn.disabled = selectedRows.length === 0;
-    }
-
-    async function fetchFilteredProducts(page = 1) {
-        // Collect filter values
-        const filters = {};
-        Array.from(filterModalEl.querySelectorAll('input, select')).forEach(input => {
-            if (input.name && input.value) filters[input.name] = input.value;
-        });
-        filters.page = page;
-
-        const response = await fetch('/filters', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(filters)
-        });
-        const data = await response.json();
-        renderTable(data.products);
-        renderPagination(data.page, data.pages);
-    }
-
-    function renderTable(products) {
-        tableBody.innerHTML = "";
-        products.forEach((p, i) => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td><input type="checkbox" class="barcode" value="${p.barcode}"></td>
-                <td>${i + 1}</td>
-                <td><a href="/product/edit?barcode=${p.barcode}">${p.barcode}</a></td>
-                <td>${p.desc}</td>
-                <td>${p.stock}</td>
-                <td>${p.price}</td>
-                <td>${p.updated_at ?? '-'}</td>
-                <td>${p.category ?? '-'}</td>
-                <td>${p.supplier ?? '-'}</td>
-            `;
-            tableBody.appendChild(row);
-        });
-        updateSelectedRows();
-    }
-
-    function renderPagination(current, totalPages) {
-        paginationEl.innerHTML = "";
-        if (totalPages <= 1) return;
-
-     const addPageItem = (label, disabled, callback) => {
-    const li = document.createElement("li");
-    li.className = `page-item ${disabled ? "disabled" : ""}`;
-    li.innerHTML = `<a class="page-link" href="#">${label}</a>`;
-    if (!disabled) {
-        li.querySelector("a").addEventListener("click", (e) => {
-            e.preventDefault();   // <-- prevent page reload
-            callback();
-        });
-    }
-    paginationEl.appendChild(li);
-};
-
-    addPageItem("«", current === 1, () => fetchFilteredProducts(current - 1));
-    for (let i = 1; i <= totalPages; i++) {
-        addPageItem(i, false, () => fetchFilteredProducts(i));
-    }
-    addPageItem("»", current === totalPages, () => fetchFilteredProducts(current + 1));
-
-}
-
-
-const sortState = {};
 
 document.querySelectorAll('.sort-icon').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const columnMap = {
-            barcode: 2,
-            desc: 3,
-            stock: 4,
-            price: 5,
-            updated_at: 6,
-            category: 7,
-            supplier: 8
-        };
+        const icon = btn.querySelector('i');
 
-        const colIndex = columnMap[btn.id];
-        if (colIndex === undefined) return;
+        // Initialize dataset order for toggle
+        btn.dataset.order = (btn.id === currentSort) ? currentOrder : DEFAULT_ORDER;
 
-        const asc = sortState[btn.id] = !sortState[btn.id];
-        sortTable(colIndex, asc);
-    });
-});
-
-function sortTable(colIndex, asc = true) {
-    const rows = Array.from(tableBody.querySelectorAll('tr'));
-
-    rows.sort((a, b) => {
-        let A = a.children[colIndex].innerText.trim();
-        let B = b.children[colIndex].innerText.trim();
-
-        const numA = parseFloat(A.replace(',', '.'));
-        const numB = parseFloat(B.replace(',', '.'));
-
-        if (!isNaN(numA) && !isNaN(numB)) {
-            return asc ? numA - numB : numB - numA;
+        // Initialize icon classes
+        if (icon) {
+            if (btn.id === currentSort) {
+                icon.classList.remove('fa-sort', 'fa-sort-up', 'fa-sort-down');
+                icon.classList.add(currentOrder === 'asc' ? 'fa-sort-up' : 'fa-sort-down');
+            } else {
+                icon.classList.remove('fa-sort-up', 'fa-sort-down');
+                icon.classList.add('fa-sort');
+            }
         }
 
-        return asc ? A.localeCompare(B) : B.localeCompare(A);
-    });
+        // Click listener for sorting
+        btn.addEventListener('click', () => {
+            const nextOrder = btn.dataset.order === 'asc' ? 'desc' : 'asc';
+            btn.dataset.order = nextOrder;
 
-    tableBody.innerHTML = '';
-    rows.forEach(row => tableBody.appendChild(row));
-}
+            // Update URL params
+            params.set('sort', btn.id);
+            params.set('order', nextOrder);
+            params.set('page', 1);
+
+            // Reset all icons to neutral first
+            document.querySelectorAll('.sort-icon i').forEach(ic => {
+                ic.classList.remove('fa-sort-up', 'fa-sort-down');
+                ic.classList.add('fa-sort');
+            });
+
+            // Set clicked column icon
+            if (icon) {
+                icon.classList.remove('fa-sort');
+                icon.classList.add(nextOrder === 'asc' ? 'fa-sort-up' : 'fa-sort-down');
+            }
+
+            // Redirect to apply sort
+            window.location.href = `/dashboard?${params.toString()}`;
+        });
+    });
 
 });

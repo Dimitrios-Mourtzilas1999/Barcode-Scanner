@@ -1,9 +1,9 @@
-from flask import render_template, redirect, url_for, request
+from flask import render_template, redirect, session, url_for, request
 from flask import Flask, jsonify
 from flask_migrate import Migrate
 from sqlalchemy import and_
 from extensions import db, login_manager
-from models import User, Product
+from models import Category, Supplier, User, Product
 from forms import AssignProductForm
 import sys, os
 import pymysql
@@ -57,80 +57,84 @@ def index():
     return redirect(url_for("auth.login"))
 
 
-@app.route("/api/barcodes")
-def barcodes():
-    query = request.args.get("q", "")
-    results = Product.query.filter(Product.barcode.like(f"%{query}%")).limit(10).all()
-    barcodes_list = [p.barcode for p in results]
-    return jsonify(barcodes_list)
 
 
 @app.route("/filters", methods=["POST"])
 def filters():
-    data = request.get_json()
-    if not data:
-        return jsonify({"status": "error", "message": "Could not read data"}), 400
+    data = request.get_json() or {}
+    print(data)
 
-    products = Product.query
-    print(products.all())
-    barcode = data.get("barcode")
-    category = data.get("category")
-    supplier = data.get("supplier")
+    session["filters"] = {
+        "barcode": data.get("barcode") or None,
+        "category": data.get("category") or None,
+        "supplier": data.get("supplier") or None,
+        "sort": data.get("sort") or "date_updated",
+        "order": data.get("order") or "desc",
+    }
 
-    print(barcode, category, supplier)
-
-    if barcode:
-        products = products.filter(Product.barcode == barcode)
-
-    if category:
-        products = products.filter(Product.cat_id == category)
-
-    if supplier:
-        products = products.filter(Product.supplier_id == supplier)
-
-    products, page, pages, total = paginate(products, 1, per_page=5)
-    print(products)
-    return jsonify(
-        {
-            "status": "success",
-            "products": [p.to_dict() for p in products],
-            "total": total,
-            "pages": pages,
-            "page": page,
-        }
-    )
+    return jsonify({"status": "success"})
 
 
-@app.route("/dashboard", methods=["GET", "POST"])
+
+
+@app.route("/clear-filters", methods=["POST"])
+def clear_filters():
+    session.pop("filters", None)
+    return jsonify({"status": "success"})
+
+@app.route("/dashboard", methods=["GET"])
 def dashboard():
     page = request.args.get("page", 1, type=int)
-    query = Product.query.order_by(Product.date_updated.desc())
-    form = AssignProductForm()
 
-    categories = get_categories()
-    suppliers = get_suppliers()
-    total = Product.query.count()
+    filters = session.get("filters", {})
+    print(filters)
+
+    sort = request.args.get("sort", "date_updated")
+    order = request.args.get("order", "desc")
+
+    query = Product.query
+
+    if filters.get("barcode"):
+        query = query.filter(Product.barcode == filters["barcode"])
+
+    if filters.get("category"):
+        query = query.filter(Product.cat_id == filters["category"])
+
+    if filters.get("supplier"):
+        query = query.filter(Product.supplier_id == filters["supplier"])
+
+    if sort in ["category", "supplier"]:
+        if sort == "category":
+            query = query.join(Category, Product.cat_id == Category.id)
+        elif sort == "supplier":
+            query = query.join(Supplier, Product.supplier_id == Supplier.id)
+
+    sort_map = {
+        "barcode": Product.barcode,
+        "desc": Product.desc,
+        "stock": Product.stock,
+        "price": Product.price,
+        "updated_at": Product.date_updated,
+        "category": Category.cat_type,
+        "supplier": Supplier.name,
+    }
+
+    sort_col = sort_map.get(sort, Product.date_updated)
+    query = query.order_by(sort_col.asc() if order == "asc" else sort_col.desc())
     products, page, pages, total = paginate(query, page, per_page=5)
+
+
     return render_template(
         "dashboard.html",
         products=products,
         page=page,
         pages=pages,
         total=total,
-        categories=categories,
-        suppliers=suppliers,
-        form=form,
+        categories=get_categories(),
+        suppliers=get_suppliers(),
+        active_filters=filters,  # useful for UI
+        form=AssignProductForm(),
     )
-
-
-@app.route("/fetch-product/<int:barcode>", methods=["POST"])
-def fetch_product(barcode):
-    product = Product.query.filter(Product.barcode == barcode).first()
-    if not product:
-        return jsonify({"status": "error", "message": "Product not found"})
-    return jsonify({"status": "success", "info": product})
-
-
 if __name__ == "__main__":
 
     app.run(host="localhost", port="8001")

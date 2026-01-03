@@ -2,6 +2,9 @@
 #Main_Table {
     width: 100%;
     overflow-x: auto; /* horizontal scroll on small screens */
+    overflow-y: auto;
+    max-height: 500px;
+    scroll-behavior: smooth;
     background-color: #fff;
     padding: 1rem;
     border-radius: 8px;
@@ -155,4 +158,38 @@
 
 .filters-modal.active::before {
     opacity: 1;
+}
+
+.product-actions{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+}
+
+#assignBtn{
+    border: 1px groove green;
+    border-radius: 3px;
+    padding: 0.5rem;
+    background-color: green;
+    cursor: pointer;
+
+}
+
+.btn-delete{
+    border:1px groove red;
+    border-radius: 5px;
+    padding: 0.5rem;
+    background-color: red;
+    cursor: pointer;
+
+}
+#assignBtn:hover{
+    background-color: white;
+}
+
+.fa-exchange-alt,.fa-trash{
+    color: #fff;
 }
