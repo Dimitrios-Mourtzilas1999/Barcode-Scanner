@@ -89,5 +89,11 @@
 
 .sign-out-btn:hover {
   background-color: rgba(255, 255, 255, 0.1);
-  
+   
+}
+
+.close{
+    position: relative;
+    right: 51%;
+    bottom: 22px;
 }

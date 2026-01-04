@@ -2,7 +2,20 @@
 
 {% block css %}
 <link rel="stylesheet" href="{{ url_for('auth.static', filename='css/login.css') }}">
+<link
+  rel="stylesheet"
+  href="{{url_for('auth.static',filename='css/all.min.css')}}"
+  integrity="sha512-..."
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+/>
+
+
 {% endblock %}
+
+{%block js%}
+<script src="{{url_for('auth.static',filename='js/login.js')}}"></script>
+{%endblock%}
 
 {% block content %}
 
@@ -19,41 +32,58 @@
   {% endif %}
 {% endwith %}
 
-<section class="login-section my-5">
-
-  <div class="text-center mb-4">
-    <img src="{{ url_for('auth.static', filename='images/mg_solutions.jpg') }}" alt="Logo" class="logo img-fluid">
-  </div>
-
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-6 col-lg-5">
-        <div class="card shadow-sm p-4">
-
-          <h2 class="card-title text-center mb-4">Login</h2>
-
-          <form action="{{ url_for('auth.login') }}" method="POST" class="needs-validation" novalidate>
-            {{ form.hidden_tag() }}
-
-            <div class="mb-3">
-              {{ form.username.label(class="form-label") }}
-              {{ form.username(class="form-control", placeholder="Enter your username") }}
-            </div>
-
-            <div class="mb-3">
-              {{ form.password.label(class="form-label") }}
-              {{ form.password(class="form-control", placeholder="Enter your password") }}
-            </div>
-
-            <div class="d-grid mt-3">
-              {{ form.submit(class="btn btn-primary btn-block") }}
-            </div>
-
-          </form>
-        </div>
-      </div>
+<section class="login-section">
+    
+    <!-- Left: Logo -->
+    <div class="login-logo">
+        <img src="{{url_for('auth.static',filename='images/mg_solutions.jpg')}}" alt="Logo" class="logo">
     </div>
-  </div>
+
+    <!-- Right: Form -->
+<div class="login-form">
+    <div class="card">
+        <form method="post" class="login-form-inner" action="{{url_for('auth.login')}}">
+            <h2 class="form-title">Login</h2>
+
+            <!-- Username Field -->
+            <div class="form-group">
+                <label class="form-label" for="username">Username</label>
+                <input type="text" id="username" class="form-control" placeholder="Enter your username">
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <div class="input-group">
+                    <input
+                        type="password"
+                        id="password"
+                        class="form-control"
+                        placeholder="Enter your password"
+                    >
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary toggle-password"
+                        aria-label="Toggle password visibility"
+                    >
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary btn-login">
+                Login
+            </button>
+
+            <!-- Optional Links -->
+            <div class="form-links">
+                <a href="{{url_for('auth.forgot_password')}}" class="forgot-password">Forgot Password?</a>
+            </div>
+        </form>
+    </div>
+</div>
+    </div>
 
 </section>
 

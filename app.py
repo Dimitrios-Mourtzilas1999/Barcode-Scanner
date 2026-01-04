@@ -1,19 +1,21 @@
 from flask import render_template, redirect, session, url_for, request
 from flask import Flask, jsonify
 from flask_migrate import Migrate
-from sqlalchemy import and_
 from extensions import db, login_manager
 from models import Category, Supplier, User, Product
 from forms import AssignProductForm
 import sys, os
 import pymysql
 from utils.helper import get_categories, get_suppliers, paginate
-
+from config import Config
+from auth.routes import authbp as auth_blueprint
+from product.routes import productbp as product_blueprint
+from category.routes import categorybp as category_blueprint
+from supplier.routes import supplierbp as supplier_blueprint
 
 pymysql.install_as_MySQLdb()
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config import Config
 
 
 def create_app():
@@ -28,10 +30,7 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"
-    from auth import authbp as auth_blueprint
-    from product.routes import productbp as product_blueprint
-    from category.routes import categorybp as category_blueprint
-    from supplier.routes import supplierbp as supplier_blueprint
+
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(product_blueprint)
@@ -72,7 +71,7 @@ def filters():
         "order": data.get("order") or "desc",
     }
 
-    return jsonify({"status": "success"})
+    return jsonify({"status": "success",'filters':session["filters"]})
 
 
 
@@ -82,12 +81,13 @@ def clear_filters():
     session.pop("filters", None)
     return jsonify({"status": "success"})
 
+
+
 @app.route("/dashboard", methods=["GET"])
 def dashboard():
     page = request.args.get("page", 1, type=int)
 
     filters = session.get("filters", {})
-    print(filters)
 
     sort = request.args.get("sort", "date_updated")
     order = request.args.get("order", "desc")
@@ -121,7 +121,7 @@ def dashboard():
 
     sort_col = sort_map.get(sort, Product.date_updated)
     query = query.order_by(sort_col.asc() if order == "asc" else sort_col.desc())
-    products, page, pages, total = paginate(query, page, per_page=5)
+    products, page, pages, total = paginate(query, page, per_page=3)
 
 
     return render_template(

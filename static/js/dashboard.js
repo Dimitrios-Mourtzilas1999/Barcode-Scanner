@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const DEFAULT_SORT = 'date_updated';
     const DEFAULT_ORDER = 'desc';
     const params = new URLSearchParams(window.location.search);
-
+    loadFilters();
 
     const currentSort = params.get('sort') || DEFAULT_SORT;
     const currentOrder = params.get('order') || DEFAULT_ORDER;
@@ -147,5 +147,13 @@ document.querySelectorAll('.sort-icon').forEach(btn => {
             window.location.href = `/dashboard?${params.toString()}`;
         });
     });
+
+    function loadFilters(){
+        const filters = JSON.parse(localStorage.getItem('filters'));
+        if(!filters) return;
+        filterModalEl.querySelectorAll('input, select').forEach(el => {
+            if (el.name && filters[el.name]) el.value = filters[el.name];
+        });
+    }
 
 });

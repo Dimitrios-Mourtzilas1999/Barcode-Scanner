@@ -12,3 +12,8 @@ class LoginForm(FlaskForm):
 
 
 
+class PasswordResetForm(FlaskForm):
+    password = PasswordField('Password',validators=[DataRequired()],render_kw={'class':'forgot-pwd'})
+    password_confirm = PasswordField('Confirm password',validators=[DataRequired()],render_kw={'forgot-pwd'})
+    submit = SubmitField('Reset password')
+    

@@ -193,3 +193,56 @@
 .fa-exchange-alt,.fa-trash{
     color: #fff;
 }
+
+.actions-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+/* Κοινό layout για όλα τα πεδία */
+.barcode-wrapper,
+.category-wrapper,
+.supplier-wrapper {
+    display: grid;
+    grid-template-columns: 150px 1fr; /* label | field */
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+/* Labels */
+.barcode-wrapper label,
+.category-wrapper label,
+.supplier-wrapper label {
+    text-align: right;
+    font-weight: 500;
+}
+
+/* Inputs & selects */
+.barcode-wrapper input,
+.category-wrapper select,
+.supplier-wrapper select {
+    width: 100%;
+    height: 40px;
+    padding: 6px 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Footer buttons */
+.actions-footer {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Προαιρετικό max width για φόρμα */
+.filtersForm {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
