@@ -1,248 +1,279 @@
-/* Container for the table */
-#Main_Table {
-    width: 100%;
-    overflow-x: auto; /* horizontal scroll on small screens */
-    overflow-y: auto;
-    max-height: 500px;
-    scroll-behavior: smooth;
-    background-color: #fff;
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+/* ===== Page Base ===== */
+body {
+    background: linear-gradient(135deg, #1c1f26, #2a2f3a);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #e6e9ef;
+    min-height: 100vh;
 }
 
-/* Table styling */
-#dashboard {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* Table header */
-#dashboard thead {
-    background-color: #2c3e50;
-    color: #fff;
-    font-weight: 600;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-/* Header and body cells */
-#dashboard th, 
-#dashboard td {
-    padding: 0.75rem 1rem;
-    font-size: 0.95rem;
-    border-bottom: 1px solid #e0e0e0;
-    text-align: left;
-}
-
-/* Sorting wrapper */
-.sort-div {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-/* Sorting buttons */
-.sort-icon {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    margin-left: 0.5rem;
-}
-
-/* Zebra striping */
-#dashboard tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-/* Hover effect */
-#dashboard tbody tr:hover {
-    background-color: #f1f5f9;
-}
-
-/* Selected row highlight */
-#dashboard tbody tr.selected {
-    background-color: #d0ebff; /* light blue highlight */
-}
-
-/* Checkboxes inside table */
-#dashboard input[type="checkbox"] {
-    width: 1.1rem;
-    height: 1.1rem;
-    cursor: pointer;
-}
-
-/* Checkbox wrapper styling */
-.checkbox-wrapper-31 {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* SVG checkmark */
-.checkbox-wrapper-31 svg {
-    width: 1rem;
-    height: 1rem;
-}
-
-/* Filter button */
-.filters {
-    width: 3rem;
-    height: 3rem;
-    border-radius: 10%;
-    background-color: #2c3e50;
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-    position: relative;
-    top: 11px;
-    left: 15px;
-}
-
-/* Filter button hover */
-.filters:hover {
-    background-color: #fff;
-    color: #2c3e50;
-}
-
-
-.filters-modal {
+/* ===== Flash Messages ===== */
+.flashes {
     position: fixed;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -60%); /* start slightly higher for fade-down effect */
-    width: 50%;
+    top: 1rem;
+    width: 90%;
     max-width: 600px;
-    padding: 2rem;
-    background-color: #ffffff;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    z-index: 9999;
-    gap: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99;
+}
+
+.alert {
+    border-radius: 12px;
+    background: rgba(30, 33, 42, 0.95);
+    color: #fff;
+    border: 1px solid #444;
+}
+
+/* ===== Product Actions Buttons ===== */
+.product-actions {
+    position: fixed;
+    top: 90px;
+    right: 20px;
     display: flex;
-    flex-direction: column;
+    gap: 12px;
+    z-index: 50;
+    transition: all 0.3s ease;
+}
+
+.product-actions .btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.btn-assign {
+    background: linear-gradient(135deg, #0d6efd, #6610f2);
+}
+
+.btn-assign:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(13, 110, 253, 0.5);
+}
+
+.btn-delete {
+    background: linear-gradient(135deg, #dc3545, #b02a37);
+}
+
+.btn-delete:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(220, 53, 69, 0.5);
+}
+
+/* ===== Filters Icon ===== */
+.filters {
+    position: fixed;
+    top: 84px;
+    left: 20px;
+    background: rgba(13, 110, 253, 0.9);
+    color: #fff;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
     justify-content: center;
     align-items: center;
-
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s ease;
+    cursor: pointer;
+    font-size: 1.2rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
 }
 
-/* Active state: visible + slid down into place */
-.filters-modal.active {
-    opacity: 1;
-    visibility: visible;
-    transform: translate(-50%, -50%); /* move down slightly for smooth motion */
+.filters:hover {
+    transform: scale(1.1);
 }
 
-/* Optional: darkened backdrop with fade */
-.filters-modal::before {
-    content: "";
+/* ===== Filters Modal ===== */
+.filters-modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-}
-
-.filters-modal.active::before {
-    opacity: 1;
-}
-
-.product-actions{
-    display: flex;
-    flex-direction: row;
+    background: rgba(28, 31, 38, 0.95);
+    display: none;
     justify-content: center;
     align-items: center;
+    z-index: 100;
+    padding: 2rem;
+}
+
+.filters-modal form {
+    background: rgba(40, 44, 55, 0.95);
+    padding: 2rem;
+    border-radius: 20px;
+    max-width: 600px;
     width: 100%;
-    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
-#assignBtn{
-    border: 1px groove green;
-    border-radius: 3px;
-    padding: 0.5rem;
-    background-color: green;
-    cursor: pointer;
-
+.filters-modal label {
+    color: #e6e9ef;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
 }
 
-.btn-delete{
-    border:1px groove red;
-    border-radius: 5px;
-    padding: 0.5rem;
-    background-color: red;
-    cursor: pointer;
-
-}
-#assignBtn:hover{
-    background-color: white;
+.filters-modal input,
+.filters-modal select {
+    padding: 0.6rem 0.9rem;
+    border-radius: 12px;
+    border: 1px solid #555;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    transition: all 0.25s ease;
 }
 
-.fa-exchange-alt,.fa-trash{
+.filters-modal input::placeholder {
+    color: rgba(255,255,255,0.6);
+}
+
+.filters-modal input:focus,
+.filters-modal select:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
+}
+
+.actions-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.actions-footer .btn {
+    border-radius: 12px;
+    padding: 0.6rem 1.2rem;
+    font-weight: 600;
+}
+
+.actions-footer .btn-primary {
+    background: linear-gradient(135deg, #0d6efd, #6610f2);
     color: #fff;
 }
 
-.actions-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+.actions-footer .btn-secondary {
+    background: rgba(255,255,255,0.1);
+    color: #e6e9ef;
+}
+
+.actions-footer .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(13, 110, 253, 0.5);
+}
+
+/* ===== Table Styling ===== */
+#dashboard {
     width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    margin-top: 1.5rem;
+    font-size: 0.95rem;
 }
 
-/* Κοινό layout για όλα τα πεδία */
-.barcode-wrapper,
-.category-wrapper,
-.supplier-wrapper {
-    display: grid;
-    grid-template-columns: 150px 1fr; /* label | field */
-    align-items: center;
-    gap: 15px;
-    width: 100%;
+#dashboard thead th {
+    background: rgba(30,33,42,0.9);
+    color: #e6e9ef;
+    font-weight: 600;
+    padding: 0.8rem 1rem;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #444;
+    border-radius: 12px 12px 0 0;
 }
 
-/* Labels */
-.barcode-wrapper label,
-.category-wrapper label,
-.supplier-wrapper label {
-    text-align: right;
-    font-weight: 500;
+#dashboard tbody tr {
+    background: rgba(40,44,55,0.95);
+    color: #e6e9ef;
+    transition: all 0.25s ease;
 }
 
-/* Inputs & selects */
-.barcode-wrapper input,
-.category-wrapper select,
-.supplier-wrapper select {
-    width: 100%;
-    height: 40px;
-    padding: 6px 10px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+#dashboard tbody tr:hover {
+    background: rgba(61,66,78,0.95);
 }
 
-/* Footer buttons */
-.actions-footer {
+#dashboard td, #dashboard th {
+    padding: 0.75rem 1rem;
+}
+
+#dashboard a {
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+#dashboard a:hover {
+    text-decoration: underline;
+}
+
+/* Sort Buttons */
+.sort-icon {
+    background: transparent;
+    border: none;
+    color: #e6e9ef;
+    cursor: pointer;
+    margin-left: 4px;
+}
+
+/* Checkboxes */
+.select-all, .barcode {
+    width: 18px;
+    height: 18px;
+    accent-color: #0d6efd;
+}
+
+/* ===== Modals ===== */
+.modal-content {
+    background: rgba(40,44,55,0.95);
+    color: #e6e9ef;
+    border-radius: 16px;
+}
+
+.modal-header,
+.modal-footer {
+    border: none;
+}
+
+.modal-header .btn-close {
+    filter: invert(1);
+}
+
+/* ===== Pagination & Misc ===== */
+.pagination {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
+    margin-top: 1.5rem;
 }
 
-/* Προαιρετικό max width για φόρμα */
-.filtersForm {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
+.pagination .page-item .page-link {
+    background: rgba(40,44,55,0.95);
+    color: #e6e9ef;
+    border-radius: 12px;
+    border: none;
+    margin: 0 0.2rem;
+}
+
+.pagination .page-item .page-link:hover {
+    background: #0d6efd;
+    color: #fff;
+}
+
+/* ===== Responsive ===== */
+@media(max-width: 768px) {
+    .filters-modal form {
+        padding: 1.5rem;
+    }
+
+    .product-actions {
+        flex-direction: column;
+        right: 10px;
+        gap: 8px;
+    }
 }

@@ -8,30 +8,30 @@ from flask_wtf.file import FileField, FileAllowed
 class ProductRegistrationForm(FlaskForm):
 
     barcode = StringField("Barcode", validators=[DataRequired(), Length(max=255)])
-    desc = StringField("Product Name", validators=[DataRequired()])
-    price = IntegerField("Product Price", validators=[DataRequired()])
-    stock = IntegerField("Product Quantity", validators=[DataRequired()])
-    image = FileField("Image", validators=[FileAllowed(["jpg", "png"])])
-    submit = SubmitField("Register Product")
+    desc = StringField("Περιγραφή προϊόντος", validators=[DataRequired()])
+    price = IntegerField("Τιμή προϊόντος", validators=[DataRequired()])
+    stock = IntegerField("Ποσοτητα", validators=[DataRequired()])
+    image = FileField("Αρχείο εικκόνας", validators=[FileAllowed(["jpg", "png"])])
+    submit = SubmitField("Καταχώρηση προϊόντος")
 
 
 class ProductEditForm(FlaskForm):
 
-    barcode = IntegerField(
-        "Product ID", validators=[DataRequired()], render_kw={"class": "form-control"}
+    barcode = StringField(
+        "Κωδικός", validators=[DataRequired()], render_kw={"class": "form-control"}
     )
     desc = StringField(
-        "Product Name", validators=[DataRequired()], render_kw={"class": "form-control"}
+        "Περιγραφή", validators=[DataRequired()], render_kw={"class": "form-control"}
     )
     price = IntegerField(
-        "Product Price",
+        "Τιμή",
         validators=[DataRequired()],
         render_kw={"class": "form-control"},
     )
     stock = IntegerField(
-        "Product Quantity",
+        "Ποσοτητα",
         validators=[DataRequired()],
         render_kw={"class": "form-control"},
     )
 
-    submit = SubmitField("Edit product info", render_kw={"class": "btn"})
+    submit = SubmitField("Υποβολή", render_kw={"class": "btn"})

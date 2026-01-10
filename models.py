@@ -2,6 +2,7 @@ from datetime import datetime
 from sqlalchemy import CheckConstraint, Enum
 from flask_login import UserMixin
 from extensions import db
+from hashlib import md5
 
 
 class User(db.Model, UserMixin):
@@ -12,6 +13,25 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(10), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=True)
+
+    def __repr__(self):
+        return f"<User {self.username}>"
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'role': self.role.role if self.role else None
+        }
+    
+    def set_password(self, password):
+        self.password = md5(password.encode('utf-8')).hexdigest()
+
+    @property
+    def is_admin(self):
+        return self.role.role == 'admin'
+    
+    
 
 
 class Product(db.Model):

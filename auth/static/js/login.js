@@ -1,17 +1,13 @@
+document.addEventListener("DOMContentLoaded", () => {
+    const alerts = document.querySelectorAll(".flashes .alert");
 
-document.addEventListener('DOMContentLoaded',()=>{
-const toggleBtn = document.querySelector(".toggle-password");
-    const passwordInput = document.getElementById("password");
-    const icon = toggleBtn.querySelector("i");
+    alerts.forEach(alert => {
+        // Auto-hide after 4 seconds (4000ms)
+        setTimeout(() => {
+            alert.classList.add("fade-out");
 
-    toggleBtn.addEventListener("click", () => {
-        if (passwordInput.type === "password") {
-            passwordInput.type = "text";
-            icon.classList.replace("fa-eye", "fa-eye-slash");
-        } else {
-            passwordInput.type = "password";
-            icon.classList.replace("fa-eye-slash", "fa-eye");
-        }
+            // Remove from DOM after animation completes (500ms)
+            setTimeout(() => alert.remove(), 500);
+        }, 4000);
     });
-
 });

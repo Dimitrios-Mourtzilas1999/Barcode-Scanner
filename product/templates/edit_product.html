@@ -1,6 +1,9 @@
 {% extends "base.html"%}
 
+{%block css %}
+<link rel="stylesheet" href="{{url_for('product.static',filename='css/edit_product.css')}}">
 
+{%endblock%}
 
 {%block content %}
 
@@ -37,6 +40,8 @@
     <div class="text-center">
         {{ form.submit(class="btn btn-primary px-4") }}
     </div>
+    <a href="{{url_for('dashboard')}}" class="btn btn-secondary">Πίσω</a>
+
 
 </form>
 
