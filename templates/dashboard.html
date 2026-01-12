@@ -51,58 +51,52 @@
 </div>
 
 
-<div class="filters" id="filters">
-  <i class="fa fa-filter"></i>
+
+<!-- Filters Modal -->
+<div class="filters-modal" id="filtersModal">
+  <div class="filters-content">
+    <button class="btn btn-secondary close" aria-label="Close filters modal">
+      <i class="fa fa-times"></i>
+    </button>
+
+    <form class="filtersForm">
+      <div class="actions-wrapper">
+        <div class="barcode-wrapper">
+          <label for="barcode-input">Barcode</label>
+          <input type="text" name="barcode" id="barcode-input" placeholder="Αναζήτηση κωδικού">
+        </div>
+
+        <div class="category-wrapper">
+          <label for="category-select">Κατηγορία</label>
+          <select name="category" id="category-select">
+            <option value="">----</option>
+            {% for category in categories %}
+              <option value="{{ category.id }}">{{ category.cat_type }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="supplier-wrapper">
+          <label for="supplier-select">Προμηθευτής</label>
+          <select name="supplier" id="supplier-select">
+            <option value="">----</option>
+            {% for supplier in suppliers %}
+              <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="actions-footer">
+        <button type="button" class="btn btn-primary apply-filters">Αναζήτηση</button>
+        <button type="button" class="btn btn-secondary clear-filters">Καθαρισμός</button>
+      </div>
+    </form>
+  </div>
 </div>
 
-
-<div class="filters-modal fade" id="filtersModal">
-  <button class="btn btn-secondary close" aria-label="Close filters modal"><i class="fa fa-times"></i></button>
-
-  <form class="filtersForm">
-
-    <div class="actions-wrapper">
-      <div class="barcode-wrapper">
-        <label for="barcode-input">Barcode</label>
-        <input
-          type="text"
-          name="barcode"
-          id="barcode-input"
-          placeholder="Αναζήτηση κωδικού">
-      </div>
-
-
-      <div class="category-wrapper">
-        <label for="category-select">Κατηγορία</label>
-        <select name="category" id="category-select">
-          <option value="">----</option>
-          {% for category in categories %}
-            <option value="{{ category.id }}">{{ category.cat_type }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div class="supplier-wrapper">
-        <label for="supplier-select">Προμηθευτής</label>
-        <select name="supplier" id="supplier-select">
-          <option value="">----</option>
-          {% for supplier in suppliers %}
-            <option value="{{ supplier.id }}">{{ supplier.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
-
-    <div class="actions-footer">
-      <button
-        type="button"
-        class="btn btn-primary apply-filters">
-        Αναζήτηση
-      </button>
-      <button type="button" class="btn btn-secondary clear-filters">Καθαρισμός</button>
-    </div>
-  </form>
-</div>
+<!-- Filters Button -->
+<button class="filters">⚙</button>
 
 <div class="modal fade" id="assignModal" tabindex="-1" aria-labelledby="assignModalLabel" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog">

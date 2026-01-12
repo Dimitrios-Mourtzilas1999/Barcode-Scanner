@@ -31,7 +31,6 @@ def create_app():
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"
 
-
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(product_blueprint)
     app.register_blueprint(category_blueprint)
@@ -56,8 +55,6 @@ def index():
     return redirect(url_for("auth.login"))
 
 
-
-
 @app.route("/filters", methods=["POST"])
 def filters():
     data = request.get_json() or {}
@@ -71,16 +68,13 @@ def filters():
         "order": data.get("order") or "desc",
     }
 
-    return jsonify({"status": "success",'filters':session["filters"]})
-
-
+    return jsonify({"status": "success", "filters": session["filters"]})
 
 
 @app.route("/clear-filters", methods=["POST"])
 def clear_filters():
     session.pop("filters", None)
     return jsonify({"status": "success"})
-
 
 
 @app.route("/dashboard", methods=["GET"])
@@ -123,7 +117,6 @@ def dashboard():
     query = query.order_by(sort_col.asc() if order == "asc" else sort_col.desc())
     products, page, pages, total = paginate(query, page, per_page=3)
 
-
     return render_template(
         "dashboard.html",
         products=products,
@@ -135,6 +128,8 @@ def dashboard():
         active_filters=filters,  # useful for UI
         form=AssignProductForm(),
     )
+
+
 if __name__ == "__main__":
 
     app.run(host="localhost", port="8001")

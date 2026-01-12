@@ -12,13 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const assignModalEl = document.getElementById('assignModal');
     const assignModal = new bootstrap.Modal(assignModalEl);
 
-    const filterBtn = document.querySelector('.filters');
-    const filterModalElDOM = document.getElementById('filtersModal');
-    const filterModal = new bootstrap.Modal(filterModalElDOM, { backdrop: 'static', keyboard: false });
+    const filterBtn = document.querySelector('.filters'); // button that opens the modal
+    const filterModal = document.getElementById('filtersModal'); // modal container
 
-    const closeBtn = filterModalElDOM.querySelector('.close');
-    const filtersApplyBtn = filterModalElDOM.querySelector('.apply-filters');
-    const clearFiltersBtn = filterModalElDOM.querySelector('.clear-filters');
+    const closeBtn = filterModal.querySelector('.close');
+    const filtersApplyBtn = filterModal.querySelector('.apply-filters');
+    const clearFiltersBtn = filterModal.querySelector('.clear-filters');
 
     const DEFAULT_SORT = 'date_updated';
     const DEFAULT_ORDER = 'desc';
@@ -32,32 +31,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ===== FILTER MODAL =====
     filterBtn?.addEventListener('click', () => {
-        // Add fade-in effect
-        filterModalElDOM.classList.add('fade');
-        filterModal.show();
+        console.log(filterBtn);
+        filterModal.classList.add('show');
+        document.body.classList.add('no-scroll');
     });
 
-    closeBtn?.addEventListener('click', () => filterModal.hide());
-
-    filtersApplyBtn?.addEventListener('click', async (e) => {
-        e.preventDefault();
-
-        const filters = {};
-        filterModalElDOM.querySelectorAll('input, select').forEach(el => {
-            if (el.name && el.value) filters[el.name] = el.value;
-        });
-
-        // Save filters to localStorage
-        localStorage.setItem('filters', JSON.stringify(filters));
-
-        await fetch('/filters', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(filters)
-        });
-
-        window.location.href = '/dashboard';
+    closeBtn?.addEventListener('click', () => {
+        filterModal.classList.remove('show');
+        document.body.classList.remove('no-scroll');
     });
+
+  filtersApplyBtn?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const filters = {};
+    filterModal.querySelectorAll('input, select').forEach(el => {
+      if (el.name && el.value) filters[el.name] = el.value;
+    });
+    localStorage.setItem('filters', JSON.stringify(filters));
+    await fetch('/filters', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(filters)
+    });
+    window.location.href = '/dashboard';
+  });
 
     clearFiltersBtn?.addEventListener('click', async () => {
         await fetch('/clear-filters', { method: 'POST' });
@@ -111,6 +108,15 @@ document.addEventListener('DOMContentLoaded', () => {
         else alert("Delete failed");
     });
 
+
+    window.addEventListener('click', (e) => {
+        if (e.target === filterModal) {
+        filterModal.classList.remove('show');
+        document.body.classList.remove('no-scroll');
+        }
+    });
+
+
     // ===== SORTING =====
     document.querySelectorAll('.sort-icon').forEach(btn => {
         const icon = btn.querySelector('i');
@@ -150,13 +156,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ===== FILTERS STORAGE =====
-    function loadFilters() {
-        const filters = JSON.parse(localStorage.getItem('filters'));
-        if (!filters) return;
-        filterModalElDOM.querySelectorAll('input, select').forEach(el => {
-            if (el.name && filters[el.name]) el.value = filters[el.name];
-        });
-    }
+   function loadFilters() {
+    const filters = JSON.parse(localStorage.getItem('filters'));
+    if (!filters) return;
+    filterModal.querySelectorAll('input, select').forEach(el => {
+        if (el.name && filters[el.name]) el.value = filters[el.name];
+    });
+}
 
     function updateSortIcons() {
         // optional: highlight default sorted column on page load
