@@ -16,6 +16,8 @@ from werkzeug.utils import secure_filename
 import os
 from utils.helper import allowed_file
 from flask import Blueprint
+from werkzeug.utils import secure_filename
+import os, qrcode
 
 productbp = Blueprint(
     "product",
@@ -29,36 +31,45 @@ productbp = Blueprint(
 
 @productbp.route("/register", methods=["GET", "POST"])
 def register_product():
-
     form = ProductRegistrationForm()
+
     if form.validate_on_submit():
-        product = (
-            db.session.query(Product)
-            .filter(Product.barcode == form.barcode.data)
-            .first()
-        )
+        product = Product.query.filter_by(barcode=form.barcode.data).first()
         if product:
             flash("Το προϊόν υπάρχει ήδη", "danger")
             return redirect(url_for("dashboard"))
-        else:
 
-            try:
-                product = Product(
-                    barcode=form.barcode.data,
-                    desc=form.desc.data,
-                    stock=form.stock.data,
-                    price=form.price.data,
-                    date_created=datetime.datetime.now(),
-                    image_file=form.image.data,
+        image_filename = None
+        if form.image.data:
+            image = form.image.data
+            if image and allowed_file(image.filename):
+                filename = secure_filename(image.filename)
+                image_filename = f"{form.barcode.data}_{filename}"
+                image.save(
+                    os.path.join(current_app.config["UPLOAD_FOLDER"], image_filename)
                 )
-                db.session.add(product)
-                db.session.commit()
+            else:
+                flash("Μη έγκυρος τύπος αρχείου εικόνας", "danger")
                 return redirect(url_for("dashboard"))
-            except Exception as e:
-                print(e)
-                db.session.rollback()
-            finally:
-                db.session.close()
+
+        try:
+            product = Product(
+                barcode=form.barcode.data,
+                desc=form.desc.data,
+                stock=form.stock.data,
+                price=form.price.data,
+                date_created=datetime.datetime.now(),
+                image_file=image_filename,
+            )
+            db.session.add(product)
+            db.session.commit()
+            flash("Το προϊόν καταχωρήθηκε επιτυχώς!", "success")
+            return redirect(url_for("dashboard"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Σφάλμα κατά την καταχώρηση: {e}", "danger")
+        finally:
+            db.session.close()
 
     return render_template("register_product.html", form=form)
 
@@ -66,11 +77,12 @@ def register_product():
 @productbp.route("/edit", methods=["GET", "POST"])
 def edit_product():
     form = ProductEditForm()
+    product = None
 
-    # On GET, get barcode from query params to prefill the form
+    # --- GET ---
     if request.method == "GET":
-        barcode = request.args.get("barcode", type=int)
-        if barcode is None:
+        barcode = request.args.get("barcode", type=str)
+        if not barcode:
             flash("No barcode provided", "error")
             return redirect(url_for("dashboard"))
 
@@ -79,29 +91,67 @@ def edit_product():
             flash("Product not found", "error")
             return redirect(url_for("dashboard"))
 
-        # Prepopulate the form with product data
         form = ProductEditForm(obj=product)
 
-    # On POST, get barcode from the hidden field
+        # Generate QR code
+        qr_filename = f"{product.barcode}.png"
+        qr_path = os.path.join(current_app.static_folder, "qrcodes", qr_filename)
+        os.makedirs(os.path.dirname(qr_path), exist_ok=True)
+        qr = qrcode.QRCode(box_size=6, border=2)
+        qr.add_data(product.barcode)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+        img.save(qr_path)
+
+        return render_template(
+            "edit_product.html", form=form, product=product, qr_filename=qr_filename
+        )
+
+    # --- POST ---
     if form.validate_on_submit():
-        barcode = form.barcode.data
-        product = Product.query.filter_by(barcode=barcode).first()
+        product = Product.query.filter_by(barcode=form.barcode.data).first()
         if not product:
             flash("Product not found", "error")
             return redirect(url_for("dashboard"))
 
-        # Update product from form
-        form.populate_obj(product)
+        # Handle image upload
+        if form.image.data and form.image.data.filename != "":
+            image = form.image.data
+            if allowed_file(image.filename):
+                filename = secure_filename(image.filename)
+                image_filename = f"{form.barcode.data}_{filename}"
+
+                if product.image:
+                    old_path = os.path.join(
+                        current_app.config["UPLOAD_FOLDER"], product.image
+                    )
+                    if os.path.exists(old_path):
+                        os.remove(old_path)
+
+                image.save(
+                    os.path.join(current_app.config["UPLOAD_FOLDER"], image_filename)
+                )
+                product.image = image_filename
+            else:
+                flash("Μη έγκυρος τύπος αρχείου εικόνας", "danger")
+                return redirect(
+                    url_for("product.edit_product", barcode=product.barcode)
+                )
+
+        # Update other fields
+        product.desc = form.desc.data
+        product.stock = form.stock.data
+        product.price = form.price.data
+        product.date_updated = datetime.datetime.now()
+
         try:
-            product.date_updated = datetime.datetime.now()
             db.session.commit()
             flash("Product updated successfully!", "success")
+            return redirect(url_for("dashboard"))
         except Exception as e:
             db.session.rollback()
             flash(f"Failed to update product: {str(e)}", "error")
-        return redirect(url_for("dashboard"))
-
-    return render_template("edit_product.html", form=form)
+            return redirect(url_for("product.edit_product", barcode=product.barcode))
 
 
 @productbp.route("/upload", methods=["GET", "POST"])

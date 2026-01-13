@@ -1,49 +1,64 @@
-{% extends "base.html"%}
+{% extends "base.html" %}
 
-{%block css %}
-<link rel="stylesheet" href="{{url_for('product.static',filename='css/edit_product.css')}}">
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('product.static', filename='css/edit_product.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+{% endblock %}
 
-{%endblock%}
+{% block content %}
+{% include 'menu.html' %}
 
-{%block content %}
+{% if form %}
+<div class="edit-panel">
 
-{%if form %}
+  <!-- LEFT: Product visual (image + QR + barcode) -->
+  <div class="product-card">
+    {% if product.image %}
+      <img src="{{ url_for('static', filename='uploads/' + product.image) }}" class="product-image" alt="Product Image">
+    {% else %}
+      <div class="placeholder">No image</div>
+    {% endif %}
+      <img src="{{ url_for('static', filename='qrcodes/' + qr_filename) }}" class="qr-code" alt="QR Code">
 
-<form action="{{url_for('product.edit_product')}}" method="post">
+  </div>
 
-    
-    {{ form.hidden_tag() }}
-    {{ form.barcode(type="hidden") }}
+  <!-- RIGHT: Form -->
+<div class="form-card">
+    <form class="product-form" action="{{ url_for('product.edit_product') }}" method="post" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
+      {{ form.barcode(type="hidden") }}
 
-
-    <div class="mb-3">
-        {{ form.barcode.label(class="form-label") }}
+      <div class="form-row">
+        <label>{{ form.barcode.label.text }}</label>
         {{ form.barcode(class="form-control") }}
-    </div>
+      </div>
 
-    <div class="mb-3">
-        {{ form.desc.label(class="form-label") }}
+      <div class="form-row">
+        <label>{{ form.desc.label.text }}</label>
         {{ form.desc(class="form-control") }}
-    </div>
+      </div>
 
-    <div class="mb-3">
-        {{ form.price.label(class="form-label") }}
+      <div class="form-row">
+        <label>{{ form.price.label.text }}</label>
         {{ form.price(class="form-control") }}
-    </div>
+      </div>
 
-    <div class="mb-3">
-        {{ form.stock.label(class="form-label") }}
+      <div class="form-row">
+        <label>{{ form.stock.label.text }}</label>
         {{ form.stock(class="form-control") }}
-    </div>
+      </div>
 
+      <div class="form-row">
+        <label>{{ form.image.label.text }}</label>
+        {{ form.image(class="form-control") }}
+      </div>
 
-    <div class="text-center">
-        {{ form.submit(class="btn btn-primary px-4") }}
-    </div>
-    <a href="{{url_for('dashboard')}}" class="btn btn-secondary">Πίσω</a>
-
-
-</form>
-
-{%endif%}
-{%endblock%}
+      <div class="form-actions">
+        {{ form.submit(class="btn btn-primary") }}
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back</a>
+      </div>
+    </form>
+  </div>
+</div>{% endif %}
+{% endblock %}

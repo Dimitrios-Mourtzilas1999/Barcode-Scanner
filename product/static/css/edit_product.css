@@ -1,129 +1,140 @@
-/* Page background enhancement */
-body {
-    background: linear-gradient(135deg, #1c1f26, #2a2f3a);
-    min-height: 100vh;
+/* ===== Layout Container ===== */
+.edit-panel {
+    display: flex;
+    gap: 2.5rem;
+    max-width: 1100px;
+    margin: 3rem auto;
+    flex-wrap: wrap;
+    align-items: flex-start;
 }
 
-/* Form container */
-form {
-    max-width: 560px;
-    margin: 4rem auto;
-    padding: 2.8rem 3rem;
-    background: linear-gradient(180deg, #ffffff, #f9fafc);
-    border-radius: 20px;
-    box-shadow:
-        0 20px 45px rgba(0, 0, 0, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    position: relative;
-    overflow: hidden;
+/* ===== LEFT: Product Image + QR ===== */
+.product-card {
+    flex: 0 0 250px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    text-align: center;
 }
 
-/* Decorative top accent */
-form::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 6px;
-    width: 100%;
-    background: linear-gradient(90deg, #0d6efd, #6610f2);
-}
-
-/* Labels */
-.form-label {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #495057;
-    letter-spacing: 0.3px;
-}
-
-/* Inputs */
-.form-control {
-    background: #fdfefe;
-    border: 1px solid #dde3ea;
+.product-card img.product-image {
+    width: 180px;
+    height: auto;
     border-radius: 14px;
-    padding: 0.75rem 1rem;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-/* Input hover */
-.form-control:hover {
-    border-color: #b6c2d1;
+.product-card img.qr-code {
+    width: 120px;
+    height: 120px;
+    margin-top: 1rem;
+    border-radius: 8px;
 }
 
-/* Input focus */
+/* ===== RIGHT: Form ===== */
+.form-card {
+    flex: 1;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    padding: 2.5rem 3rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* ===== Form Rows ===== */
+.form-row {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.form-row label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.4rem;
+}
+
+/* Make inputs truly full width */
+.form-control {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background: #fafbfc;
+    box-sizing: border-box; /* ensures padding doesn't reduce width */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Input focus state */
 .form-control:focus {
-    background: #ffffff;
     border-color: #0d6efd;
-    box-shadow:
-        0 0 0 4px rgba(13, 110, 253, 0.18),
-        0 8px 20px rgba(13, 110, 253, 0.25);
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+    outline: none;
+    background: #fff;
 }
 
-/* Field spacing */
-.mb-3 {
-    margin-bottom: 1.7rem !important;
+/* ===== Buttons ===== */
+.form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1.2rem;
+    margin-top: 2rem;
 }
 
-/* Submit button */
 .btn-primary {
     background: linear-gradient(135deg, #0d6efd, #6610f2);
+    color: #fff;
     border: none;
-    border-radius: 16px;
-    padding: 0.75rem 2.8rem;
-    font-weight: 700;
-    letter-spacing: 0.4px;
-    box-shadow: 0 10px 24px rgba(13, 110, 253, 0.45);
-    transition: all 0.35s ease;
-}
-
-/* Submit hover */
-.btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 16px 40px rgba(102, 16, 242, 0.55);
-}
-
-/* Submit active */
-.btn-primary:active {
-    transform: translateY(0);
-    box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4);
-}
-
-/* Back button */
-.btn-secondary {
-    margin-top: 1.4rem;
-    display: inline-block;
-    border-radius: 14px;
-    padding: 0.55rem 1.8rem;
+    padding: 0.9rem 2.8rem;
+    border-radius: 12px;
     font-weight: 600;
-    opacity: 0.9;
+    font-size: 1rem;
+    box-shadow: 0 10px 24px rgba(13, 110, 253, 0.35);
     transition: all 0.3s ease;
 }
 
-/* Back hover */
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 40px rgba(102, 16, 242, 0.45);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: #fff;
+    padding: 0.9rem 2.2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.25s ease;
+}
+
 .btn-secondary:hover {
-    opacity: 1;
-    transform: translateX(-2px);
+    background: #5a6268;
+    transform: translateY(-1px);
 }
 
-/* Button alignment */
-.text-center {
-    margin-top: 2.4rem;
-}
-
-/* Subtle form animation */
-form {
-    animation: fadeSlide 0.7s ease-out;
-}
-
-@keyframes fadeSlide {
-    from {
-        opacity: 0;
-        transform: translateY(18px);
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+    .edit-panel {
+        flex-direction: column;
+        align-items: center;
     }
-    to {
-        opacity: 1;
-        transform: translateY(0);
+
+    .product-card,
+    .form-card {
+        width: 100%;
+    }
+
+    .form-card {
+        padding: 2rem 1.5rem;
     }
 }

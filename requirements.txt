@@ -8,3 +8,5 @@ flask-mysql-connector==1.1.0
 PyMySQL==1.1.2
 cryptography==46.0.3
 python-dotenv==1.2.1
+qrcode==8.2
+pillow==12.1.0

@@ -19,19 +19,17 @@ class User(db.Model, UserMixin):
 
     def to_dict(self):
         return {
-            'id': self.id,
-            'username': self.username,
-            'role': self.role.role if self.role else None
+            "id": self.id,
+            "username": self.username,
+            "role": self.role.role if self.role else None,
         }
-    
+
     def set_password(self, password):
-        self.password = md5(password.encode('utf-8')).hexdigest()
+        self.password = md5(password.encode("utf-8")).hexdigest()
 
     @property
     def is_admin(self):
-        return self.role.role == 'admin'
-    
-    
+        return self.role.role == "admin"
 
 
 class Product(db.Model):
@@ -44,25 +42,26 @@ class Product(db.Model):
     desc = db.Column(db.String(100), server_default="")
     stock = db.Column(db.Integer, default=0)
     price = db.Column(db.Integer, default=0.0)
-    image_file = db.Column(db.String(120), nullable=False, default='default.jpg')
+    image = db.Column(db.String(255))
     date_updated = db.Column(db.DateTime, default=datetime.now)
     date_created = db.Column(db.DateTime, default=datetime.now)
-    cat_id = db.Column(db.Integer,db.ForeignKey('category.id'),nullable=True)
-    supplier_id = db.Column(db.Integer,db.ForeignKey('suppliers.id'),nullable=True)
-    category = db.relationship('Category', backref='products', lazy=True)
-    supplier = db.relationship('Supplier', backref='products', lazy=True)
+    cat_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=True)
+    supplier_id = db.Column(db.Integer, db.ForeignKey("suppliers.id"), nullable=True)
+    category = db.relationship("Category", backref="products", lazy=True)
+    supplier = db.relationship("Supplier", backref="products", lazy=True)
 
     def to_dict(self):
         return {
-            'id': self.id,
-            'barcode': self.barcode,
-            'desc': self.desc,
-            'stock': self.stock,
-            'price': self.price,
-            'category': self.category.cat_type if self.category else None,
-            'date_updated': self.date_updated.strftime('%Y-%m-%d') if self.date_updated else None
+            "id": self.id,
+            "barcode": self.barcode,
+            "desc": self.desc,
+            "stock": self.stock,
+            "price": self.price,
+            "category": self.category.cat_type if self.category else None,
+            "date_updated": (
+                self.date_updated.strftime("%Y-%m-%d") if self.date_updated else None
+            ),
         }
-
 
     def __repr__(self):
         return f"Generated QR Code {self.id} - {self.barcode}"
@@ -80,9 +79,9 @@ class Roles(db.Model):
 
 
 class Category(db.Model):
-    __tablename__ = 'category'
-    __table_args__ = {'extend_existing':True}
-    id = db.Column(db.Integer(),primary_key = True,autoincrement=True)
+    __tablename__ = "category"
+    __table_args__ = {"extend_existing": True}
+    id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
     cat_type = db.Column(db.String(100))
 
 
@@ -93,5 +92,3 @@ class Supplier(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), nullable=True)
     phone = db.Column(db.String(100), nullable=True)
-
-    

@@ -1,8 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import  StringField, IntegerField, SubmitField
+from wtforms import StringField, IntegerField, SubmitField
 from wtforms.validators import DataRequired, Length
 from flask_wtf.file import FileField, FileAllowed
-
 
 
 class ProductRegistrationForm(FlaskForm):
@@ -33,5 +32,7 @@ class ProductEditForm(FlaskForm):
         validators=[DataRequired()],
         render_kw={"class": "form-control"},
     )
+
+    image = FileField("Αρχείο εικκόνας", validators=[FileAllowed(["jpg", "png"])])
 
     submit = SubmitField("Υποβολή", render_kw={"class": "btn"})
