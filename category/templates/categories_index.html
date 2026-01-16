@@ -1,21 +1,18 @@
-{%extends "base.html"%}
+{% extends "base.html" %}
 
-
-{%block css %}
-
-<link rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}">
-<link rel="stylesheet" href="{{url_for('category.static',filename='css/categories_index.css')}}">
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('category.static', filename='css/categories_index.css') }}">
+{% endblock %}
 
-{%endblock%}
+{% block content %}
 
-{%block content %}
-
-{%include 'menu.html'%}
+{% include 'menu.html' %}
 
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-    <div class="flashes container mt-3">
+    <div class="container mt-3">
       {% for category, message in messages %}
         <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
           {{ message }}
@@ -26,21 +23,44 @@
   {% endif %}
 {% endwith %}
 
+{% if categories %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="fw-bold"><i class="fa-solid fa-list"></i> Κατηγορίες</h3>
+    <a href="{{url_for('category.register_category')}}">
+      <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Νέα Κατηγορία</button>
+    </a>
+  </div>
 
-
-{%if categories %}
-
-<nav>
-  <div class="categories">
-    {%for category in categories%}
-      <div class="category">
-        <div class="category-name">
-          <a href="{{url_for('category.categories')}}">{{category.cat_type}}</a>
+  <div class="row g-3">
+    {% for cat in categories %}
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+      <div class="card category-card h-100">
+        <div class="card-body text-center">
+          <i class="fa-solid fa-boxes-stacked category-icon mb-3"></i>
+          <h5 class="category-title mb-2">{{ cat.cat_type }}</h5>
+          <p class="text-muted mb-3 product-count">
+            <i class="fa-solid fa-cubes me-1"></i> 
+            <span class="fw-bold">{{ cat.product_count }}</span> προϊόντα
+          </p>
+          <div>
+            <a href="#" class="btn btn-outline-primary btn-sm">
+              <i class="fa-solid fa-eye"></i> Προβολή
+            </a>
+            <a href="#" class="btn btn-outline-secondary btn-sm">
+              <i class="fa-solid fa-pen"></i> Επεξεργασία
+            </a>
+          </div>
         </div>
       </div>
-    {%endfor%}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+<div class="container mt-5 text-center">
+  <h5 class="text-muted">Δεν υπάρχουν διαθέσιμες κατηγορίες.</h5>
+</div>
+{% endif %}
 
-</nav>
-{%endif%}
-
-{%endblock%}
+{% endblock %}

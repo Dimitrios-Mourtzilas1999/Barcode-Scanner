@@ -109,13 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    window.addEventListener('click', (e) => {
-        if (e.target === filterModal) {
-        filterModal.classList.remove('show');
-        document.body.classList.remove('no-scroll');
-        }
-    });
-
 
     // ===== SORTING =====
     document.querySelectorAll('.sort-icon').forEach(btn => {

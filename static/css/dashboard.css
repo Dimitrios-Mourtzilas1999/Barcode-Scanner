@@ -26,15 +26,14 @@ body {
 
 /* ===== Product Actions Buttons ===== */
 .product-actions {
-    position: fixed;
-    top: 75px;
-    left: 102px;
+    position: relative;
+    top: 23px;
+    left: 30%; /* same offset as main content */
     display: flex;
     gap: 12px;
-    z-index: 50;
+    z-index: 1; /* above sidebar */
     transition: all 0.3s ease;
 }
-
 .product-actions .btn {
     display: flex;
     align-items: center;
@@ -45,6 +44,25 @@ body {
     color: #fff;
     cursor: pointer;
     transition: all 0.25s ease;
+}
+
+.product-actions.hidden {
+    display: none;
+}
+
+
+
+.product-actions .btn-assign {
+    background: linear-gradient(135deg, #0d6efd, #6610f2);
+}
+
+.product-actions .btn-delete {
+    background: linear-gradient(135deg, #dc3545, #b02a37);
+}
+
+.product-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
 }
 
 .btn-assign {
@@ -68,13 +86,13 @@ body {
 /* ===== Filters Icon ===== */
 .filters {
     position: fixed;
-    top: 84px;
-    left: 20px;
+    top: 22px;
+    left: 16%;
     background: rgba(13, 110, 253, 0.9);
     color: #fff;
     width: 50px;
     height: 50px;
-    border-radius: 50%;
+    border-radius: 22%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -317,6 +335,10 @@ body {
     display: flex;
     justify-content: center;
     margin-top: 1.5rem;
+    position: relative;
+    top: 26px;
+    width: 83%;
+    left: 3%;
 }
 
 .pagination .page-item .page-link {
@@ -345,6 +367,20 @@ body {
     }
 }
 
+
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding: 1rem;
+    }
+
+    .product-actions {
+        left: 20px;
+        top: 120px;
+        flex-direction: column;
+        gap: 8px;
+    }
+}
 /* ===== Vertical center modal on large screens ===== */
 @media(min-width: 576px) {
     .filters-modal {
@@ -375,4 +411,17 @@ body {
     right: 4%;
     bottom: 22px;
     width: 10%;
+}
+.main-content #Main_Table {
+    width: calc(100% - 280px); /* ensures table fits inside main-content */
+    overflow-x: auto;
+    position: relative;
+    top: 34px;
+    left: 3%;
+}
+
+.main-content {
+    margin-left: 280px; /* increased from 240px to 280px for extra spacing */
+    padding: 1.5rem;
+    transition: margin-left 0.3s ease;
 }
