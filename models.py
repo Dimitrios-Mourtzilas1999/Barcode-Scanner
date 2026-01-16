@@ -42,7 +42,7 @@ class Product(db.Model):
     desc = db.Column(db.String(100), server_default="")
     stock = db.Column(db.Integer, default=0)
     price = db.Column(db.Integer, default=0.0)
-    image = db.Column(db.String(255))
+    image = db.Column(db.String(255), nullable=True)
     date_updated = db.Column(db.DateTime, default=datetime.now)
     date_created = db.Column(db.DateTime, default=datetime.now)
     cat_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=True)

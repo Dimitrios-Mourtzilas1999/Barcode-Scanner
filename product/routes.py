@@ -59,7 +59,7 @@ def register_product():
                 stock=form.stock.data,
                 price=form.price.data,
                 date_created=datetime.datetime.now(),
-                image=image_filename,
+                image=image_filename if image_filename else None,
             )
             db.session.add(product)
             db.session.commit()
