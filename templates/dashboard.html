@@ -191,7 +191,7 @@
       </thead>
       <tbody id="names">
           {% for product in products %}
-              {% set indx = (page - 1) * 5 + loop.index %}
+              {% set indx = (page - 1) * per_page  + loop.index %}
           <tr>
               <td><input type="checkbox" name="barcodes" value="{{product.barcode}}" class="barcode"></td>
               <td>{{ indx }}</td>

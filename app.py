@@ -123,6 +123,7 @@ def dashboard():
         page=page,
         pages=pages,
         total=total,
+        per_page=3,
         categories=get_categories(),
         suppliers=get_suppliers(),
         active_filters=filters,  # useful for UI
