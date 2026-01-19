@@ -1,26 +1,48 @@
-  body {
-    background-color: #f8f9fa;
-  }
-  .category-card {
-    transition: all 0.2s ease-in-out;
-    border-radius: 15px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  }
-  .category-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  }
-  .category-icon {
+/* Offset main content for fixed sidebar */
+.main-content {
+    margin-left: 280px; /* adjust to your sidebar width */
+    padding: 2rem;
+}
+
+/* Cards */
+.category-card {
+    background: rgba(40,44,55,0.95);
+    border-radius: 16px;
+    padding: 1rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: all 0.25s ease;
+}
+
+.category-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+
+/* Icons */
+.category-icon {
     font-size: 2.5rem;
     color: #0d6efd;
-  }
-  .category-title {
+}
+
+/* Titles */
+.category-title {
+    color: #000000;
     font-weight: 600;
-  }
-  .product-count {
-    font-size: 1.1rem;
-  }
-  .badge-count {
-    font-size: 0.9rem;
-    background-color: #0d6efd;
-  }
+}
+
+/* Buttons */
+.btn-sm {
+    padding: 0.35rem 0.8rem;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .main-content {
+        margin-left: 0;
+        padding: 1rem;
+    }
+}

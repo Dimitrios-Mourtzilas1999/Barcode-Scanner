@@ -1,164 +1,93 @@
-document.addEventListener('DOMContentLoaded', () => {
+// dashboard.js
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("Dashboard initialized");
 
-    // ===== DOM ELEMENTS =====
-    const tableBody = document.querySelector('#dashboard tbody');
-    const assignForm = document.querySelector('#assignForm');
-    const modalBarcodesInput = document.querySelector('#modal-barcodes');
-    const productActions = document.getElementById('productActions');
-    const selectAll = document.querySelector('#selectAll');
-    const assignBtn = document.querySelector('#assignBtn');
-    const deleteBtn = document.querySelector('.btn-delete');
+  // ===== CHART CONFIG HELPERS =====
+  const defaultColors = [
+    "#0d6efd", "#6610f2", "#6f42c1", "#20c997",
+    "#198754", "#ffc107", "#dc3545", "#0dcaf0",
+    "#fd7e14", "#adb5bd"
+  ];
 
-    const assignModalEl = document.getElementById('assignModal');
-    const assignModal = new bootstrap.Modal(assignModalEl);
+  /**
+   * Initialize a chart safely
+   * @param {string} id - Canvas element ID
+   * @param {string} type - Chart type ('pie', 'doughnut', etc.)
+   * @param {Object} dataObj - { labels: [...], values: [...] }
+   * @param {Object} [options={}] - Optional Chart.js overrides
+   */
+  const initChart = (id, type, dataObj, options = {}) => {
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
 
-    const filterBtn = document.querySelector('.filters'); // button that opens the modal
-    const filterModal = document.getElementById('filtersModal'); // modal container
+    const ctx = canvas.getContext("2d");
+    const data = {
+      labels: dataObj.labels,
+      datasets: [
+        {
+          data: dataObj.values,
+          backgroundColor: defaultColors.slice(0, dataObj.values.length),
+          borderColor: "#1c1f26",
+          borderWidth: 2,
+          hoverOffset: 6
+        }
+      ]
+    };
 
-    const closeBtn = filterModal.querySelector('.close');
-    const filtersApplyBtn = filterModal.querySelector('.apply-filters');
-    const clearFiltersBtn = filterModal.querySelector('.clear-filters');
+    const defaultOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: {
+            color: "#e6e9ef",
+            font: { size: 13 }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `${ctx.label}: ${ctx.formattedValue}`
+          }
+        }
+      }
+    };
 
-    const DEFAULT_SORT = 'date_updated';
-    const DEFAULT_ORDER = 'desc';
-    const params = new URLSearchParams(window.location.search);
-
-    const currentSort = params.get('sort') || DEFAULT_SORT;
-    const currentOrder = params.get('order') || DEFAULT_ORDER;
-
-    loadFilters();
-    updateSortIcons();
-
-    // ===== FILTER MODAL =====
-    filterBtn?.addEventListener('click', () => {
-        console.log(filterBtn);
-        filterModal.classList.add('show');
-        document.body.classList.add('no-scroll');
+    new Chart(ctx, {
+      type,
+      data,
+      options: { ...defaultOptions, ...options }
     });
+  };
 
-    closeBtn?.addEventListener('click', () => {
-        filterModal.classList.remove('show');
-        document.body.classList.remove('no-scroll');
-    });
+  // ===== FETCH DATA FROM EMBEDDED JSON =====
+  // These are injected by Flask: {{ category_data|tojson }} and {{ supplier_data|tojson }}
+  const categoryData = window.categoryData || {};
+  const supplierData = window.supplierData || {};
 
-  filtersApplyBtn?.addEventListener('click', async (e) => {
-    e.preventDefault();
-    const filters = {};
-    filterModal.querySelectorAll('input, select').forEach(el => {
-      if (el.name && el.value) filters[el.name] = el.value;
-    });
-    localStorage.setItem('filters', JSON.stringify(filters));
-    await fetch('/filters', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(filters)
-    });
-    window.location.href = '/dashboard';
+  // ===== INITIALIZE CHARTS =====
+  initChart("categoryChart", "pie", categoryData);
+  initChart("supplierChart", "doughnut", supplierData);
+
+  // ===== OPTIONAL: ANIMATED COUNTERS =====
+  const counters = document.querySelectorAll(".summary-card p");
+  counters.forEach(counter => {
+    const value = parseFloat(counter.textContent.replace(/[^\d.]/g, ""));
+    if (isNaN(value)) return;
+
+    let start = 0;
+    const duration = 800; // in ms
+    const increment = value / (duration / 16); // frame = ~16ms
+
+    const animate = () => {
+      start += increment;
+      if (start >= value) {
+        counter.textContent = value.toLocaleString();
+        return;
+      }
+      counter.textContent = Math.floor(start).toLocaleString();
+      requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
   });
-
-    clearFiltersBtn?.addEventListener('click', async () => {
-        await fetch('/clear-filters', { method: 'POST' });
-        localStorage.removeItem('filters');
-        window.location.href = '/dashboard';
-    });
-
-    // ===== SELECTION =====
-    selectAll?.addEventListener('change', e => {
-        tableBody.querySelectorAll('input.barcode')
-            .forEach(cb => cb.checked = e.target.checked);
-        updateSelectedRows();
-    });
-
-    tableBody?.addEventListener('change', e => {
-        if (e.target.matches('input.barcode')) updateSelectedRows();
-    });
-
-    function updateSelectedRows() {
-        const selected = tableBody.querySelectorAll('input.barcode:checked').length;
-        productActions.classList.toggle('hidden', selected === 0);
-        assignBtn.disabled = deleteBtn.disabled = selected === 0;
-    }
-
-    assignBtn?.addEventListener('click', () => assignModal.show());
-
-    // ===== ASSIGN FORM =====
-    assignForm?.addEventListener('submit', e => {
-        const selected = [...tableBody.querySelectorAll('input.barcode:checked')].map(cb => cb.value);
-
-        if (!selected.length) {
-            e.preventDefault();
-            alert("Select at least one product");
-            return;
-        }
-        modalBarcodesInput.value = selected.join(',');
-    });
-
-    // ===== DELETE =====
-    deleteBtn?.addEventListener('click', async () => {
-        const selected = [...tableBody.querySelectorAll('input.barcode:checked')].map(cb => cb.value);
-        if (!selected.length) return alert("Select products first");
-
-        const res = await fetch('/product/delete', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ barcodes: selected })
-        });
-
-        if (res.ok) location.reload();
-        else alert("Delete failed");
-    });
-
-
-
-    // ===== SORTING =====
-    document.querySelectorAll('.sort-icon').forEach(btn => {
-        const icon = btn.querySelector('i');
-
-        btn.dataset.order = (btn.id === currentSort) ? currentOrder : DEFAULT_ORDER;
-
-        // Initialize icon classes
-        if (icon) {
-            if (btn.id === currentSort) {
-                icon.classList.remove('fa-sort', 'fa-sort-up', 'fa-sort-down');
-                icon.classList.add(currentOrder === 'asc' ? 'fa-sort-up' : 'fa-sort-down');
-            } else {
-                icon.classList.remove('fa-sort-up', 'fa-sort-down');
-                icon.classList.add('fa-sort');
-            }
-        }
-
-        btn.addEventListener('click', () => {
-            const nextOrder = btn.dataset.order === 'asc' ? 'desc' : 'asc';
-            btn.dataset.order = nextOrder;
-
-            params.set('sort', btn.id);
-            params.set('order', nextOrder);
-            params.set('page', 1);
-
-            // Reset icons
-            document.querySelectorAll('.sort-icon i').forEach(ic => {
-                ic.classList.remove('fa-sort-up', 'fa-sort-down');
-                ic.classList.add('fa-sort');
-            });
-
-            // Set clicked icon
-            if (icon) icon.classList.add(nextOrder === 'asc' ? 'fa-sort-up' : 'fa-sort-down');
-
-            window.location.href = `/dashboard?${params.toString()}`;
-        });
-    });
-
-    // ===== FILTERS STORAGE =====
-   function loadFilters() {
-    const filters = JSON.parse(localStorage.getItem('filters'));
-    if (!filters) return;
-    filterModal.querySelectorAll('input, select').forEach(el => {
-        if (el.name && filters[el.name]) el.value = filters[el.name];
-    });
-}
-
-    function updateSortIcons() {
-        // optional: highlight default sorted column on page load
-    }
-
 });

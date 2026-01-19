@@ -1,25 +1,29 @@
 {% extends "base.html" %}
 
-
-{%block css %}
-<link rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}">
-<link rel="stylesheet" href="{{url_for('static',filename='css/dashboard.css')}}">
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+{% endblock %}
 
-{%endblock%}
-
-{%block js %}
-<script src="{{url_for('static',filename='js/dashboard.js')}}"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js"></script>
-{%endblock%}
+{% block js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+  window.categoryData = {{ category_data|tojson }};
+  window.supplierData = {{ supplier_data|tojson }};
+</script>
+{% endblock %}
 
 {% block content %}
 {% include 'menu.html' %}
 
 <div class="main-content">
+
+  <!-- Flash messages -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-      <div class="flashes container mt-3">
+      <div class="container mt-3">
         {% for category, message in messages %}
           <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
             {{ message }}
@@ -30,190 +34,67 @@
     {% endif %}
   {% endwith %}
 
-<div class="product-actions hidden" id="productActions">
-  <button id="assignBtn" class="btn btn-assign" aria-label="Assign product to category">
-    <i class="fa fa-exchange-alt" aria-hidden="true"></i>
-    <span>Ανάθεση προϊόντος</span>
-  </button>
-
-  <button class="btn btn-delete" aria-label="Delete product">
-    <i class="fa fa-trash" aria-hidden="true"></i>
-    <span>Διαγραφή Προϊόντος</span>
-  </button>
-</div>
-
-  <!-- Your Filters Modal and Assign Modal here -->
-
-
-<!-- Filters Modal -->
-  <div class="filters-modal" id="filtersModal">
-    <div class="filters-content">
-      <button class="btn btn-secondary close" aria-label="Close filters modal">
-        <i class="fa fa-times"></i>
-      </button>
-
-      <form class="filtersForm">
-        <div class="actions-wrapper">
-          <div class="barcode-wrapper">
-            <label for="barcode-input">Barcode</label>
-            <input type="text" name="barcode" id="barcode-input" placeholder="Αναζήτηση κωδικού">
-          </div>
-
-          <div class="category-wrapper">
-            <label for="category-select">Κατηγορία</label>
-            <select name="category" id="category-select">
-              <option value="">----</option>
-              {% for category in categories %}
-                <option value="{{ category.id }}">{{ category.cat_type }}</option>
-              {% endfor %}
-            </select>
-          </div>
-
-          <div class="supplier-wrapper">
-            <label for="supplier-select">Προμηθευτής</label>
-            <select name="supplier" id="supplier-select">
-              <option value="">----</option>
-              {% for supplier in suppliers %}
-                <option value="{{ supplier.id }}">{{ supplier.name }}</option>
-              {% endfor %}
-            </select>
+  <!-- ===== Summary Cards ===== -->
+  <div class="container-fluid mt-4">
+    <div class="row g-3">
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="summary-card">
+          <div class="card-icon bg-primary"><i class="fa-solid fa-box"></i></div>
+          <div class="card-info">
+            <h5>Προϊόντα</h5>
+            <p>{{ total_products }}</p>
           </div>
         </div>
-
-        <div class="actions-footer">
-          <button type="button" class="btn btn-primary apply-filters">Αναζήτηση</button>
-          <button type="button" class="btn btn-secondary clear-filters">Καθαρισμός</button>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="summary-card">
+          <div class="card-icon bg-success"><i class="fa-solid fa-layer-group"></i></div>
+          <div class="card-info">
+            <h5>Κατηγορίες</h5>
+            <p>{{ total_categories }}</p>
+          </div>
         </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Filters Button -->
-  <button class="fa fa-filter filters"></button>
-
-  <div class="modal fade" id="assignModal" tabindex="-1" aria-labelledby="assignModalLabel" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <form id="assignForm" method="POST" action="{{url_for('category.assign_to_category')}}">
-          {{ form.hidden_tag() }}
-
-          <div class="modal-header">
-            <h5 class="modal-title" id="assignModalLabel">Ανάθεση Προϊόντων</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="summary-card">
+          <div class="card-icon bg-warning"><i class="fa-solid fa-truck"></i></div>
+          <div class="card-info">
+            <h5>Προμηθευτές</h5>
+            <p>{{ total_suppliers }}</p>
           </div>
-
-          <div class="modal-body">
-            <label class="form-label" for="category-assign">{{ form.categories.label.text }}</label>
-            {{ form.categories(id='category-assign', class="form-select") }}
-
-            <label class="form-label" for="supplier-assign">{{form.suppliers.label.text}}</label>
-            {{form.suppliers(id='supplier-assign',class='form-select')}}
-            
-            <input type="hidden" name="barcodes" id="modal-barcodes">
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3">
+        <div class="summary-card">
+          <div class="card-icon bg-info"><i class="fa-solid fa-euro-sign"></i></div>
+          <div class="card-info">
+            <h5>Αξία Αποθέματος</h5>
+            <p>{{ total_stock_value }} €</p>
           </div>
-
-          <div class="modal-footer">
-            {{ form.submit }}
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Άκυρο</button>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   </div>
 
-
-
-  <div id="Main_Table" class="app">
-  <table id="dashboard">
-      <thead id="table-header">
-          <tr style="user-select: none;">
-              <th>
-                <input type="checkbox" id="selectAll" style="cursor: pointer;" class="select-all">
-              </th>
-              <th>A.A</th>
-              <th>
-                  <div class="sort-div">
-                      Barcode
-                      <button id="barcode" class="btn sort-icon" data-order="desc">
-                          <i class="fa-solid fa-sort"></i>
-                      </button>
-                  </div> 
-              </th>
-              <th>
-                  <div class="sort-div">
-                      ΠΕΡΙΓΡΑΦΗ ΠΡΟΪΟΝΤΟΣ
-                      <button id="desc" class="btn sort-icon" data-order="desc">
-                          <i class="fa-solid fa-sort"></i>
-                      </button>
-                  </div> 
-              </th>
-              <th>
-                  <div class="sort-div">
-                      ΑΠΟΘΕΜΑ
-                      <button id="stock" class="btn sort-icon" data-order="desc">
-                          <i class="fa-solid fa-sort"></i>
-                      </button>
-                  </div>
-              </th>
-              <th>
-                  <div class="sort-div">
-                      ΤΙΜΗ
-                      <button id="price" class="btn sort-icon" data-order="desc">
-                          <i class="fa-solid fa-sort"></i>
-                      </button>
-                  </div>
-              </th>
-              <th>
-                  <div class="sort-div">
-                      ΕΝΗΜΕΡΩΘΗΚΕ
-                      <button id="updated_at" class="btn sort-icon" data-order="desc">
-                          <i class="fa-solid fa-sort"></i>
-                      </button>
-                  </div> 
-              </th>
-              <th>
-                  <div class="sort-div">
-                      ΚΑΤΗΓΟΡΙΑ
-                      <button id="category" class="btn sort-icon" data-order="desc">
-                          <i class="fa-solid fa-sort"></i>
-                      </button>
-                  </div> 
-              </th>
-              <th>
-                  <div class="sort-div">
-                      ΠΡΟΜΗΘΕΥΤΗΣ
-                      <button id="supplier" class="btn sort-icon" data-order="desc">
-                          <i class="fa-solid fa-sort"></i>
-                      </button>
-                  </div> 
-              </th>
-          </tr>
-      </thead>
-      <tbody id="names">
-          {% for product in products %}
-              {% set indx = (page - 1) * per_page  + loop.index %}
-          <tr>
-              <td><input type="checkbox" name="barcodes" value="{{product.barcode}}" class="barcode"></td>
-              <td>{{ indx }}</td>
-              <td><a href="{{url_for('product.edit_product',barcode=product.barcode)}}">
-                {{product.barcode }}
-              </a>
-              </td>
-              <td>{{ product.desc }}</td>
-              <td>{{ product.stock }}</td>
-              <td>{{ product.price }}</td>
-              <td>{{ product.date_updated if product.date_updated else '-'}}</td>
-              <td>{{ product.category.cat_type if product.category else '-' }}</td>
-              <td>{{ product.supplier.name  if product.supplier else '-'}}</td>
-          </tr>
-          {% endfor %}
-      </tbody>
-  </table>
+  <!-- ===== Charts Section ===== -->
+  <div class="container-fluid mt-5">
+    <div class="row g-4">
+      <div class="col-12 col-lg-6">
+        <div class="chart-card">
+          <h5><i class="fa-solid fa-chart-pie me-2"></i> Κατανομή Προϊόντων ανά Κατηγορία</h5>
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+      <div class="col-12 col-lg-6">
+        <div class="chart-card">
+          <h5><i class="fa-solid fa-chart-pie me-2"></i> Κατανομή Προϊόντων ανά Προμηθευτή</h5>
+          <canvas id="supplierChart"></canvas>
+        </div>
+      </div>
     </div>
-
-  {%include 'pagination.html'%}
-
-  {%include 'copyright.html'%}
-
-  {%endblock%}
+  </div>
 </div>
+
+  {% include 'copyright.html' %}
+
+{% endblock %}

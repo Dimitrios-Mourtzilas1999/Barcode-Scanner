@@ -6,7 +6,7 @@ from models import Category, Supplier, User, Product
 from forms import AssignProductForm
 import sys, os
 import pymysql
-from utils.helper import get_categories, get_suppliers, paginate
+from utils.helper import paginate
 from config import Config
 from auth.routes import authbp as auth_blueprint
 from product.routes import productbp as product_blueprint
@@ -79,55 +79,47 @@ def clear_filters():
 
 @app.route("/dashboard", methods=["GET"])
 def dashboard():
-    page = request.args.get("page", 1, type=int)
+    total_products = Product.query.count()
+    total_categories = Category.query.count()
+    total_suppliers = Supplier.query.count()
+    total_stock_value = (
+        db.session.query(db.func.sum(Product.price * Product.stock)).scalar() or 0
+    )
 
-    filters = session.get("filters", {})
+    # === Category Pie Data ===
+    category_counts = (
+        db.session.query(Category.cat_type, db.func.count(Product.id))
+        .outerjoin(Product, Product.cat_id == Category.id)
+        .group_by(Category.cat_type)
+        .all()
+    )
 
-    sort = request.args.get("sort", "date_updated")
-    order = request.args.get("order", "desc")
-
-    query = Product.query
-
-    if filters.get("barcode"):
-        query = query.filter(Product.barcode == filters["barcode"])
-
-    if filters.get("category"):
-        query = query.filter(Product.cat_id == filters["category"])
-
-    if filters.get("supplier"):
-        query = query.filter(Product.supplier_id == filters["supplier"])
-
-    if sort in ["category", "supplier"]:
-        if sort == "category":
-            query = query.join(Category, Product.cat_id == Category.id)
-        elif sort == "supplier":
-            query = query.join(Supplier, Product.supplier_id == Supplier.id)
-
-    sort_map = {
-        "barcode": Product.barcode,
-        "desc": Product.desc,
-        "stock": Product.stock,
-        "price": Product.price,
-        "updated_at": Product.date_updated,
-        "category": Category.cat_type,
-        "supplier": Supplier.name,
+    category_data = {
+        "labels": [c[0] for c in category_counts],
+        "values": [c[1] for c in category_counts],
     }
 
-    sort_col = sort_map.get(sort, Product.date_updated)
-    query = query.order_by(sort_col.asc() if order == "asc" else sort_col.desc())
-    products, page, pages, total = paginate(query, page, per_page=3)
+    # === Supplier Pie Data ===
+    supplier_counts = (
+        db.session.query(Supplier.name, db.func.count(Product.id))
+        .outerjoin(Product, Product.supplier_id == Supplier.id)
+        .group_by(Supplier.name)
+        .all()
+    )
+
+    supplier_data = {
+        "labels": [s[0] for s in supplier_counts],
+        "values": [s[1] for s in supplier_counts],
+    }
 
     return render_template(
         "dashboard.html",
-        products=products,
-        page=page,
-        pages=pages,
-        total=total,
-        per_page=3,
-        categories=get_categories(),
-        suppliers=get_suppliers(),
-        active_filters=filters,  # useful for UI
-        form=AssignProductForm(),
+        total_products=total_products,
+        total_categories=total_categories,
+        total_suppliers=total_suppliers,
+        total_stock_value=total_stock_value,
+        category_data=category_data,
+        supplier_data=supplier_data,
     )
 
 

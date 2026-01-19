@@ -11,7 +11,7 @@ from flask import (
 from sqlalchemy.exc import SQLAlchemyError
 from .forms import ProductRegistrationForm, ProductEditForm
 from extensions import db
-from models import Product
+from models import Category, Product, Supplier
 from werkzeug.utils import secure_filename
 import os
 from utils.helper import allowed_file
@@ -37,7 +37,7 @@ def register_product():
         product = Product.query.filter_by(barcode=form.barcode.data).first()
         if product:
             flash("Το προϊόν υπάρχει ήδη", "danger")
-            return redirect(url_for("dashboard"))
+            return redirect(url_for("category.categories"))
 
         image_filename = None
         if form.image.data:
@@ -53,6 +53,8 @@ def register_product():
                 return redirect(url_for("dashboard"))
 
         try:
+            cat_id = request.form.get("categories")
+            supplier_id = request.form.get("suppliers")
             product = Product(
                 barcode=form.barcode.data,
                 desc=form.desc.data,
@@ -60,11 +62,13 @@ def register_product():
                 price=form.price.data,
                 date_created=datetime.datetime.now(),
                 image=image_filename if image_filename else None,
+                cat_id=cat_id if cat_id else None,
+                supplier_id=supplier_id if supplier_id else None,
             )
             db.session.add(product)
             db.session.commit()
             flash("Το προϊόν καταχωρήθηκε επιτυχώς!", "success")
-            return redirect(url_for("dashboard"))
+            return redirect(url_for("category.categories"))
         except Exception as e:
             db.session.rollback()
             flash(f"Σφάλμα κατά την καταχώρηση: {e}", "danger")

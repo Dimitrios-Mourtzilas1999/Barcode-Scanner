@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('category.static', filename='css/category_info.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+{% endblock %}
+
+{%block js %}
+<script src="{{ url_for('category.static', filename='js/category_info.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+{% include 'menu.html' %}
+
+{%with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flashes container mt-3">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{%endwith%}
+
+<div class="main-content">
+
+  <!-- Category Header Card -->
+  <div class="category-header-card">
+    <div class="category-info">
+      <h2>{{ category.cat_type }}</h2>
+      <p>Συνολικά Προϊόν: <span class="highlight">{{total }}</span></p>
+    </div>
+    <div class="category-actions">
+      <a href="{{ url_for('category.edit_category', id=category.id) }}" class="btn btn-edit">
+        <i class="fa fa-edit"></i> Επεξεργασία
+      </a>
+    </div>
+  </div>
+
+  <!-- Product List Table -->
+  {% if category.products %}
+  <div class="products-table-wrapper">
+    <table class="products-table">
+      <thead>
+        <tr>
+          <th><input type="checkbox" name="barcodes" class="checkbox" id="selectAll"></th>
+          <th>#</th>
+          <th>Κωδικός Προϊοντος</th>
+          <th>Περιγραφή Προϊοντος</th>
+          <th>Απόθεμα</th>
+          <th>Τιμή</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in category.products %}
+        <tr>
+          <td><input type="checkbox" name="barcodes" value="{{ product.barcode }}" class="checkbox" id="barcode"></td>
+          <td>{{ loop.index }}</td>
+          <td>{{ product.barcode }}</td>
+          <td>{{ product.desc }}</td>
+          <td>{{ product.stock }}</td>
+          <td>{{ product.price }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="no-products">Δεν υπαρχουν προιοντα στην κατηγορια.</p>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash
 from sqlalchemy import func
-from .forms import RegisterCategoryForm
+from .forms import EditCategoryForm, RegisterCategoryForm
 from sqlalchemy.exc import DatabaseError, SQLAlchemyError
 from models import Category, Product, Supplier
 from extensions import db
@@ -32,6 +32,60 @@ def categories():
     )
 
     return render_template("categories_index.html", categories=categories, page=page)
+
+
+@categorybp.route("/info", methods=["GET", "POST"])
+def category_info():
+
+    category = Category.query.filter_by(id=request.args.get("cat_id")).first()
+    print(f"category: {category}")
+    count = Product.query.filter_by(cat_id=category.id).count()
+    if not category:
+        flash("Η κατηγορία δεν βρέθηκε", "error")
+        return redirect(url_for("category.categories"))
+
+    return render_template("category_info.html", category=category, total=count)
+
+
+@categorybp.route("/delete", methods=["GET", "POST"])
+def delete_category():
+    category = Category.query.filter_by(id=request.args.get("cat_id")).first()
+    if not category:
+        flash("Η κατηγορία δεν βρέθηκε", "error")
+        return redirect(url_for("category.categories"))
+
+    try:
+        db.session.delete(category)
+        db.session.commit()
+        flash("Η κατηγορία διαγραφήκε", "success")
+        return redirect(url_for("category.categories"))
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        print(f"[ERROR]: {e}")
+
+    return render_template("delete_category.html", category=category)
+
+
+@categorybp.route("/edit", methods=["GET", "POST"])
+def edit_category():
+
+    edit_category_form = EditCategoryForm()
+    category = Category.query.filter_by(id=request.args.get("id")).first()
+    if not category:
+        flash("Η κατηγορία δεν βρέθηκε", "error")
+        return redirect(url_for("category.categories"))
+
+    if request.method == "POST":
+        if edit_category_form.validate_on_submit():
+            category.cat_type = edit_category_form.category_type.data
+            db.session.commit()
+            return redirect(url_for("category.categories"))
+        else:
+            print(edit_category_form.errors)
+
+    return render_template(
+        "edit_category.html", category=category, form=edit_category_form
+    )
 
 
 @categorybp.route("/register-category", methods=["GET", "POST"])

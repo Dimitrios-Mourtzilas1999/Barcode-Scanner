@@ -8,11 +8,11 @@ ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def get_categories():
-    return Category.query.order_by(Category.cat_type).all()
+# def get_categories():
+#     return Category.query.order_by(Category.cat_type).all()
 
-def get_suppliers():
-    return Supplier.query.order_by(Supplier.name).all()
+# def get_suppliers():
+#     return Supplier.query.order_by(Supplier.name).all()
 
 
 def paginate(query, page, per_page=20):
