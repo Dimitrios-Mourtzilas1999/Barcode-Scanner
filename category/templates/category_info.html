@@ -42,7 +42,12 @@
 
   <!-- Product List Table -->
   {% if category.products %}
-  <div class="products-table-wrapper">
+    <div class="products-table-wrapper">
+    <div class="table-actions mb-2">
+    <button type="button" class="btn btn-delete" id="deleteSelectedBtn">
+      <i class="fa fa-trash"></i> Διαγραφή Επιλεγμένων
+    </button>
+  </div>
     <table class="products-table">
       <thead>
         <tr>
@@ -59,7 +64,7 @@
         <tr>
           <td><input type="checkbox" name="barcodes" value="{{ product.barcode }}" class="checkbox" id="barcode"></td>
           <td>{{ loop.index }}</td>
-          <td>{{ product.barcode }}</td>
+          <td><a href="{{ url_for('product.edit_product', barcode=product.barcode) }}">{{ product.barcode }}</a></td>
           <td>{{ product.desc }}</td>
           <td>{{ product.stock }}</td>
           <td>{{ product.price }}</td>

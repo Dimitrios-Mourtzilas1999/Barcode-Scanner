@@ -22,14 +22,17 @@
       </li>
 
       <li>
-
-      </li>
-
-      <li>
         <a href="{{ url_for('category.categories') }}" class="sidebar__btn {% if request.endpoint == 'category.categories' %}active{% endif %}">
           <i class="fa fa-list"></i> Κατηγορίες
         </a>
       </li>
+  
+      <li>
+        <a href="{{ url_for('supplier.suppliers') }}" class="sidebar__btn {% if request.endpoint == 'category.categories' %}active{% endif %}">
+          <i class="fa fa-truck"></i> Προμηθευτές
+        </a>
+      </li>
+
     </ul>
   </div>
 

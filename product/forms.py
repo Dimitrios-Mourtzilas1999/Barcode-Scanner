@@ -8,9 +8,9 @@ from models import Category, Supplier
 
 class ProductRegistrationForm(FlaskForm):
 
-    def get_categories():
-        categories = Category.query.all()
-        return [(category.id, category.cat_type) for category in categories]
+    # def get_categories():
+    #     categories = Category.query.all()
+    #     return [(category.id, category.cat_type) for category in categories]
 
     def get_suppliers():
         suppliers = Supplier.query.all()
@@ -21,9 +21,9 @@ class ProductRegistrationForm(FlaskForm):
     price = IntegerField("Τιμή προϊόντος", validators=[DataRequired()])
     stock = IntegerField("Ποσοτητα", validators=[DataRequired()])
     image = FileField("Αρχείο εικκόνας", validators=[FileAllowed(["jpg", "png"])])
-    categories = SelectField(
-        "Κατηγορία", choices=get_categories, validators=[DataRequired()]
-    )
+    # categories = SelectField(
+    #     "Κατηγορία", choices=get_categories, validators=[DataRequired()]
+    # )
     suppliers = SelectField(
         "Προμηθευτής", choices=get_suppliers, validators=[DataRequired()]
     )

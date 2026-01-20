@@ -3,6 +3,7 @@ from flask import (
     jsonify,
     render_template,
     redirect,
+    session,
     url_for,
     request,
     flash,
@@ -14,7 +15,7 @@ from extensions import db
 from models import Category, Product, Supplier
 from werkzeug.utils import secure_filename
 import os
-from utils.helper import allowed_file
+from utils.helper import allowed_file, paginate
 from flask import Blueprint
 from werkzeug.utils import secure_filename
 import os, qrcode
@@ -32,7 +33,7 @@ productbp = Blueprint(
 @productbp.route("/register", methods=["GET", "POST"])
 def register_product():
     form = ProductRegistrationForm()
-
+    cat_id = request.args.get("cat_id")
     if form.validate_on_submit():
         product = Product.query.filter_by(barcode=form.barcode.data).first()
         if product:
@@ -53,7 +54,8 @@ def register_product():
                 return redirect(url_for("dashboard"))
 
         try:
-            cat_id = request.form.get("categories")
+            cat_id = request.args.get("cat_id")
+            print(f"Cat id {cat_id}")
             supplier_id = request.form.get("suppliers")
             product = Product(
                 barcode=form.barcode.data,
@@ -75,7 +77,7 @@ def register_product():
         finally:
             db.session.close()
 
-    return render_template("register_product.html", form=form)
+    return render_template("register_product.html", form=form, cat_id=cat_id)
 
 
 @productbp.route("/edit", methods=["GET", "POST"])

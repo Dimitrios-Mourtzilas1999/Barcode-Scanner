@@ -56,7 +56,7 @@
 
       <div class="form-actions">
         {{ form.submit(class="btn btn-primary") }}
-        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Πίσω</a>
+        <a href="{{ url_for('category.category_info', cat_id=product.cat_id) }}" class="btn btn-secondary">Πίσω</a>
       </div>
     </form>
   </div>

@@ -193,6 +193,73 @@ body {
   }
 }
 
+
+@media (max-width: 576px) {
+  .category-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .btn-delete, .btn-edit {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+.category-actions .btn-delete,
+.table-actions .btn-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #dc3545; /* Bootstrap red */
+  color: #fff;
+  border: 1px solid #dc3545;
+  border-radius: 6px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  text-decoration: none;
+}
+
+/* Hover */
+.category-actions .btn-delete:hover,
+.table-actions .btn-delete:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-delete i {
+  font-size: 0.9rem;
+}
+
+
+.btn-delete:active {
+  background-color: #a71d2a;
+  transform: translateY(0);
+}
+
+.btn-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== ACTION BUTTONS GROUP (Edit + Delete) ===== */
+.category-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ===== TABLE ACTION AREA ABOVE PRODUCTS TABLE ===== */
+.table-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
 a.btn.btn-primary.new-product-btn {
     position: relative;
     left: 87%;

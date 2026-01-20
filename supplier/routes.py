@@ -10,7 +10,7 @@ from flask import (
 from sqlalchemy.exc import SQLAlchemyError
 from .forms import SupplierRegistrationForm, SupplierEditForm
 from extensions import db
-from models import Supplier
+from models import Category, Product, Supplier
 from flask import Blueprint
 
 supplierbp = Blueprint(
@@ -23,15 +23,40 @@ supplierbp = Blueprint(
 )
 
 
+@supplierbp.route("/", methods=["GET", "POST"])
+def suppliers():
+    suppliers = Supplier.query.order_by(Supplier.name).all()
+    product_count = Supplier.query.join(Product).count()
+    return render_template(
+        "suppliers_index.html", suppliers=suppliers, product_count=product_count
+    )
+
+
+@supplierbp.route("/supplier/<int:supplier_id>/products")
+def supplier_products(supplier_id):
+    supplier = Supplier.query.get_or_404(supplier_id)
+    products = (
+        Product.query.filter_by(supplier_id=supplier_id)
+        .join(Category, isouter=True)
+        .add_entity(Category)
+        .all()
+    )
+
+    # Optional: simplify product list if you already have relationships
+    products = supplier.products  # if Supplier → Product relationship exists
+
+    return render_template(
+        "supplier_products.html", supplier=supplier, products=products
+    )
+
+
 @supplierbp.route("/register", methods=["GET", "POST"])
 def register_supplier():
 
     form = SupplierRegistrationForm()
     if form.validate_on_submit():
         supplier = (
-            db.session.query(Supplier)
-            .filter(Supplier.name == form.name.data)
-            .first()
+            db.session.query(Supplier).filter(Supplier.name == form.name.data).first()
         )
         if supplier:
             flash("Ο προμηθευτής υπάρχει ήδη", "danger")
@@ -40,9 +65,7 @@ def register_supplier():
 
             try:
                 supplier = Supplier(
-                    name=form.name.data,
-                    email = form.email.data,
-                    phone=form.phone.data
+                    name=form.name.data, email=form.email.data, phone=form.phone.data
                 )
                 db.session.add(supplier)
                 db.session.commit()
@@ -78,7 +101,7 @@ def edit_supplier():
     # On POST, get barcode from the hidden field
     if form.validate_on_submit():
         name = form.name.data
-        supplier = Supplier.query.filter_by(name=request.args.get('name','')).first()
+        supplier = Supplier.query.filter_by(name=request.args.get("name", "")).first()
         if not supplier:
             flash("Supplier not found", "error")
             return redirect(url_for("dashboard"))
@@ -102,8 +125,8 @@ def delete():
     data = request.get_json()
     if not data:
         return jsonify({"status": "error", "message": "Could not read data"}), 400
-    
-    name = data.get('name','')
+
+    name = data.get("name", "")
     supplier = Supplier.query.filter(Supplier.name == name).first()
 
     try:
