@@ -34,10 +34,10 @@ def categories():
     return render_template("categories_index.html", categories=categories, page=page)
 
 
-@categorybp.route("/info", methods=["GET", "POST"])
-def category_info():
+@categorybp.route("/info/<int:cat_id>", methods=["GET", "POST"])
+def category_info(cat_id):
 
-    category = Category.query.filter_by(id=request.args.get("cat_id")).first()
+    category = Category.query.filter_by(id=cat_id).first()
     print(f"category: {category}")
     count = Product.query.filter_by(cat_id=category.id).count()
     if not category:
@@ -66,11 +66,11 @@ def delete_category():
     return render_template("delete_category.html", category=category)
 
 
-@categorybp.route("/edit", methods=["GET", "POST"])
-def edit_category():
+@categorybp.route("/edit/<int:id>", methods=["GET", "POST"])
+def edit_category(id):
 
     edit_category_form = EditCategoryForm()
-    category = Category.query.filter_by(id=request.args.get("id")).first()
+    category = Category.query.filter_by(id=id).first()
     if not category:
         flash("Η κατηγορία δεν βρέθηκε", "error")
         return redirect(url_for("category.categories"))

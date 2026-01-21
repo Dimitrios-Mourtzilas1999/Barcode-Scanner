@@ -1,12 +1,14 @@
-
 from typing import OrderedDict
 from models import Category, Supplier
 from sqlalchemy import Integer, Float, String
 from math import ceil
+
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 # def get_categories():
 #     return Category.query.order_by(Category.cat_type).all()
@@ -18,7 +20,7 @@ def allowed_file(filename):
 def paginate(query, page, per_page=20):
     """
     Paginate a SQLAlchemy query.
-    
+
     Returns:
         items       -> items for the current page
         page        -> current page number
@@ -32,4 +34,11 @@ def paginate(query, page, per_page=20):
     return items, page, pages, total
 
 
+def get_categories():
+    categories = Category.query.all()
+    return [(category.id, category.cat_type) for category in categories]
 
+
+def get_suppliers():
+    suppliers = Supplier.query.all()
+    return [(supplier.id, supplier.name) for supplier in suppliers]

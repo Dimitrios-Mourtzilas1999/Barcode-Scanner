@@ -30,6 +30,25 @@ productbp = Blueprint(
 )
 
 
+@productbp.route("/fetch-all-products")
+def fetch_all_products():
+    products, page, pages, total = paginate(
+        Product.query, request.args.get("page", 1, type=int)
+    )
+
+    context = {"products": products, "page": page, "pages": pages, "total": total}
+    return render_template("snippets/all_products_table.html", **context)
+
+
+@productbp.route("/fetch-products-by-category")
+def fetch_products_by_category():
+    products = Product.query.options(db.joinedload(Product.category)).all()
+    page, pages, total = paginate(products, request.args.get("page", 1, type=int))
+
+    context = {"products": products, "page": page, "pages": pages, "total": total}
+    return render_template("snippets/products_by_category.html", **context)
+
+
 @productbp.route("/register", methods=["GET", "POST"])
 def register_product():
     form = ProductRegistrationForm()
@@ -80,21 +99,58 @@ def register_product():
     return render_template("register_product.html", form=form, cat_id=cat_id)
 
 
-@productbp.route("/edit", methods=["GET", "POST"])
-def edit_product():
+@productbp.route("/edit/<int:barcode>", methods=["GET", "POST"])
+def edit_product(barcode):
     form = ProductEditForm()
     product = None
 
-    # --- GET ---
-    if request.method == "GET":
-        barcode = request.args.get("barcode", type=str)
+    # --- POST ---
+    if request.method == "POST":
+
+        if form.validate_on_submit():
+
+            product = Product.query.filter_by(barcode=barcode).first()
+            if not product:
+                flash("Δεν βρέθηκε το προϊόν", "error")
+                return redirect(url_for("dashboard"))
+
+            # Handle image upload
+            if form.image.data and form.image.data.filename != "":
+                image = form.image.data
+                if image and allowed_file(image.filename):
+                    filename = secure_filename(image.filename)
+                    image.save(
+                        os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
+                    )
+                    product.image = filename
+                else:
+                    flash("Μη έγκυρος τύπος αρχείου εικόνας", "danger")
+                    return redirect(url_for("dashboard"))
+
+            try:
+                # Update product from form
+                product.barcode = form.barcode.data
+                product.desc = form.desc.data
+                product.stock = form.stock.data
+                product.price = form.price.data
+                product.cat_id = form.categories.data
+                product.supplier_id = form.suppliers.data
+                product.date_created = datetime.datetime.now()
+                db.session.commit()
+                flash("Το προϊόν ενημερωθηκε", "success")
+                return redirect(url_for("dashboard"))
+            except Exception as e:
+                db.session.rollback()
+                flash(f"Πρόβλημα κατά την ενημερωση: {e}", "danger")
+            finally:
+                db.session.close()
+    else:
+
         if not barcode:
-            flash("No barcode provided", "error")
             return redirect(url_for("dashboard"))
 
         product = Product.query.filter_by(barcode=barcode).first()
         if not product:
-            flash("Product not found", "error")
             return redirect(url_for("dashboard"))
 
         form = ProductEditForm(obj=product)
@@ -109,9 +165,9 @@ def edit_product():
         img = qr.make_image(fill_color="black", back_color="white")
         img.save(qr_path)
 
-        return render_template(
-            "edit_product.html", form=form, product=product, qr_filename=qr_filename
-        )
+        context = {"form": form, "product": product, "qr_filename": qr_filename}
+
+        return render_template("edit_product.html", **context)
 
     # --- POST ---
     if form.validate_on_submit():

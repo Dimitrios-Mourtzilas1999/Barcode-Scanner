@@ -25,7 +25,7 @@
 
   <!-- RIGHT: Form -->
 <div class="form-card">
-    <form class="product-form" action="{{ url_for('product.edit_product') }}" method="post" enctype="multipart/form-data">
+    <form class="product-form" action="{{ url_for('product.edit_product', barcode=product.barcode) }}" method="post" enctype="multipart/form-data">
       {{ form.hidden_tag() }}
       {{ form.barcode(type="hidden") }}
 
@@ -50,13 +50,23 @@
       </div>
 
       <div class="form-row">
+        <label>{{ form.suppliers.label.text }}</label>
+        {{ form.suppliers(class="form-control") }}
+      </div>
+
+      <div class="form-row">
+        <label>{{ form.categories.label.text }}</label>
+        {{ form.categories(class="form-control") }}
+      </div>
+
+      <div class="form-row">
         <label>{{ form.image.label.text }}</label>
         {{ form.image(class="form-control") }}
       </div>
 
       <div class="form-actions">
         {{ form.submit(class="btn btn-primary") }}
-        <a href="{{ url_for('category.category_info', cat_id=product.cat_id) }}" class="btn btn-secondary">Πίσω</a>
+        <a href="{{ url_for('product.products') }}" class="btn btn-secondary">Πίσω</a>
       </div>
     </form>
   </div>

@@ -33,6 +33,12 @@
         </a>
       </li>
 
+      <li>
+        <a href="{{ url_for('product.products') }}" class="sidebar__btn {% if request.endpoint == 'category.categories' %}active{% endif %}">
+          <i class="fa fa-truck"></i> Προϊόντα
+        </a>
+      </li>
+
     </ul>
   </div>
 

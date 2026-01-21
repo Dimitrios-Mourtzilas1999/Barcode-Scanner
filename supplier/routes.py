@@ -32,7 +32,7 @@ def suppliers():
     )
 
 
-@supplierbp.route("/supplier/<int:supplier_id>/products")
+@supplierbp.route("/<int:supplier_id>/products")
 def supplier_products(supplier_id):
     supplier = Supplier.query.get_or_404(supplier_id)
     products = (
