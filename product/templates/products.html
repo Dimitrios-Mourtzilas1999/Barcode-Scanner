@@ -2,20 +2,19 @@
 
 {% block css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link rel="stylesheet" href="{{ url_for('category.static', filename='css/categories_index.css') }}">
+<link rel="stylesheet" href="{{ url_for('product.static', filename='css/products.css') }}">
 {% endblock %}
 
-{%block js%}
-<script src="{{ url_for('category.static', filename='js/categories_index.js') }}"></script>
-{%endblock%}
+{% block js %}
+<script src="{{ url_for('product.static', filename='js/products.js') }}"></script>
+
+{% endblock %}
+
 
 {% block content %}
-
 {% include 'menu.html' %}
 
 <div class="main-content">
-  <div class="container-fluid">
     <!-- Flash messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -30,38 +29,45 @@
       {% endif %}
     {% endwith %}
 
-    {% if products %}
-      <!-- Page Header -->
-      <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
-        <h3 class="fw-bold"><i class="fa-solid fa-list"></i> Κατηγορίες</h3>
-        <div class="d-flex gap-2">
-          <a href="{{ url_for('category.register_category') }}" class="btn btn-primary btn-sm">
-            <i class="fa-solid fa-plus"></i> Νέα Κατηγορία
-          </a>
-        </div>
-      </div>
+  <div class="container-fluid">
 
-      {%include 'category_preview.html'%}
-          <!-- Container where fetched data will be rendered -->
-      <div id="dynamicContent">
-        <!-- Optionally, display categories cards by default -->
-        {% include 'category_preview.html' %}
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+      <h3 class="fw-bold"><i class="fa-solid fa-list"></i> Προϊόντα</h3>
+      <div class="d-flex gap-2">
+        <a href="{{ url_for('product.register_product') }}" class="btn btn-primary btn-sm">
+          <i class="fa-solid fa-plus"></i> Νέο Προϊόν
+        </a>
       </div>
+    </div>
 
-      <!-- Loading Spinner -->
-      <div id="spinner" class="text-center my-4" style="display: none;">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    {% else %}
-      <div class="text-center mt-5">
-        <h5 class="text-muted">Δεν υπάρχουν διαθέσιμες κατηγορίες.</h5>
-      </div>
-    {% endif %}
+
+    <!-- View toggle buttons -->
+    <div class="d-flex gap-2 mb-3">
+      <a href="{{ url_for('product.products', view='list') }}" 
+         class="btn btn-sm {% if current_view=='list' %}btn-primary{% else %}btn-outline-primary{% endif %}" id="btnProductList">
+        <i class="fa-solid fa-list"></i> Λίστα
+      </a>
+      <a href="{{ url_for('product.products', view='cards') }}" 
+         class="btn btn-sm {% if current_view=='cards' %}btn-primary{% else %}btn-outline-primary{% endif %}" id="btnProductCard">
+        <i class="fa-solid fa-layer-group"></i> Κάρτες
+      </a>
+      <button class="btn btn-sm btn-outline-danger" id="btnProductDelete">
+        <i class="fa-solid fa-trash"></i> Διαραφή Επιλεγμένων
+      </button>
+      
+
+    </div>
+
+
+
+    <!-- Dynamic content: include snippet -->
+    <div id="dynamicContent">
+        {% include snippet %}
+    </div>
+
+    <!-- Default pagination -->
+
   </div>
-
 </div>
-
-
 {% endblock %}

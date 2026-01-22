@@ -47,8 +47,8 @@ class Product(db.Model):
     date_created = db.Column(db.DateTime, default=datetime.now)
     cat_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=True)
     supplier_id = db.Column(db.Integer, db.ForeignKey("suppliers.id"), nullable=True)
-    category = db.relationship("Category", backref="products", lazy=True)
-    supplier = db.relationship("Supplier", backref="products", lazy=True)
+    category = db.relationship("Category", backref="products", lazy="select")
+    supplier = db.relationship("Supplier", backref="products", lazy="select")
 
     def to_dict(self):
         return {

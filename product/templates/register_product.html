@@ -15,7 +15,7 @@
 {%include 'menu.html'%}
 {%if form %}
 
-<form action="{{ url_for('product.register_product',cat_id=cat_id) }}" 
+<form action="{{ url_for('product.register_product') }}" 
       method="POST" 
       enctype="multipart/form-data"
       class="container p-4 mt-4 shadow rounded bg-white">
@@ -44,6 +44,11 @@
             {{ form.stock.label(class="form-label fw-semibold") }}
             {{ form.stock(class="form-control", placeholder="0") }}
         </div>
+    </div>
+
+    <div class="mb-3">
+        {{ form.categories.label(class="form-label fw-semibold") }}
+        {{ form.categories(class="form-control") }}
     </div>
 
     <div class="mb-3">

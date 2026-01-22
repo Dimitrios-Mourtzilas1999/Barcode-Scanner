@@ -1,0 +1,46 @@
+
+{%extends "products.html" %}
+
+{%block css %}
+<link rel="stylesheet" href="{{url_for('product.static',filename='css/product_list.css')}}">
+{%endblock%}
+
+{%block js%}
+<script src="{{url_for('product.static',filename='js/table_sort.js')}}"></script>
+{%endblock%}
+
+{%block content %}
+
+  <table class="table table-hover table-bordered align-middle products-table">
+    <thead class="table-light">
+      <tr>
+        <th><input type="checkbox" name="barcodes" class="checkbox" id="selectAll"></th>
+        <th ># </th>
+        <th scope="col" data-sort="barcode">Κωδικός <i class="fa-solid fa-sort"></i></th>
+        <th scope="col" data-sort="desc">Περιγραφή <i class="fa-solid fa-sort"></i></th>
+        <th scope="col" data-sort="category">Κατηγορία <i class="fa-solid fa-sort"></i></th>
+        <th scope="col" data-sort="stock">Απόθεμα <i class="fa-solid fa-sort"></i></th>
+        <th scope="col" data-sort="price">Τιμή <i class="fa-solid fa-sort"></i></th>
+      </tr>
+    </thead>
+    <tbody id="productTableBody">
+      {% for product in products %}
+      {%set index = loop.index + (page - 1) * per_page%}
+        <tr>
+        <td><input type="checkbox" name="barcode" value="{{product.barcode}}" class="checkbox"></td>
+        <td>{{ index }}</td>
+        <td><a href="{{url_for('product.edit_product',barcode=product.barcode)}}"> 
+          {{product.barcode }}
+        </a>
+        </td>
+        <td>{{ product.desc }}</td>
+        <td>{{ product.category.cat_type if product.category else 'Χωρίς κατηγορία' }}</td>
+        <td>{{ product.stock }}</td>
+        <td>{{ "%.2f"|format(product.price) }} €</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {%include 'pagination.html'%}
+
+{%endblock%}

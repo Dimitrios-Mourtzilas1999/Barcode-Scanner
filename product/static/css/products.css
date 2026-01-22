@@ -108,3 +108,16 @@
   background-color: #f3f4f6;
   z-index: 11;              /* higher than tbody rows */
 }
+
+
+#btnProductDelete {
+  display: inline-block;       /* keep it inline-block instead of none */
+  opacity: 0;                  /* hidden by default */
+  pointer-events: none;        /* prevent click when hidden */
+  transition: opacity 0.3s ease-in-out;
+}
+
+#btnProductDelete.show {
+  opacity: 1;                  /* show when active */
+  pointer-events: auto;        /* allow click when active */
+}

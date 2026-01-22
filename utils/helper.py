@@ -1,6 +1,6 @@
 from typing import OrderedDict
 from models import Category, Supplier
-from sqlalchemy import Integer, Float, String
+from sqlalchemy import Integer, Float, String, distinct, func
 from math import ceil
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
@@ -17,20 +17,10 @@ def allowed_file(filename):
 #     return Supplier.query.order_by(Supplier.name).all()
 
 
-def paginate(query, page, per_page=20):
-    """
-    Paginate a SQLAlchemy query.
-
-    Returns:
-        items       -> items for the current page
-        page        -> current page number
-        pages       -> total number of pages
-        total       -> total number of items
-    """
-    total = query.count()
+def paginate(query, model, page, per_page=20):
+    total = query.with_entities(func.count(distinct(model.id))).scalar()
     items = query.offset((page - 1) * per_page).limit(per_page).all()
     pages = ceil(total / per_page)
-
     return items, page, pages, total
 
 

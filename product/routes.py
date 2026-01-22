@@ -1,9 +1,9 @@
 import datetime
+from math import ceil
 from flask import (
     jsonify,
     render_template,
     redirect,
-    session,
     url_for,
     request,
     flash,
@@ -30,23 +30,35 @@ productbp = Blueprint(
 )
 
 
-@productbp.route("/fetch-all-products")
-def fetch_all_products():
-    products, page, pages, total = paginate(
-        Product.query, request.args.get("page", 1, type=int)
+# products.py
+
+
+@productbp.route("/products/<view>")  # view can be 'list' or 'cards'
+def products(view):
+    # default page
+    page = request.args.get("page", 1, type=int)
+    per_page = 10 if view == "list" else 6
+
+    query = Product.query.options(db.joinedload(Product.category))
+    items, page, pages, total = paginate(query, Product, page, per_page)
+
+    # Decide which template to render inside the main template
+    snippet = (
+        "snippets/product_list.html"
+        if view == "list"
+        else "snippets/product_cards.html"
     )
 
-    context = {"products": products, "page": page, "pages": pages, "total": total}
-    return render_template("snippets/all_products_table.html", **context)
-
-
-@productbp.route("/fetch-products-by-category")
-def fetch_products_by_category():
-    products = Product.query.options(db.joinedload(Product.category)).all()
-    page, pages, total = paginate(products, request.args.get("page", 1, type=int))
-
-    context = {"products": products, "page": page, "pages": pages, "total": total}
-    return render_template("snippets/products_by_category.html", **context)
+    return render_template(
+        "products.html",
+        products=items,
+        page=page,
+        pages=pages,
+        total=total,
+        per_page=per_page,
+        current_view=view,
+        snippet=snippet,
+    )
 
 
 @productbp.route("/register", methods=["GET", "POST"])
@@ -57,7 +69,7 @@ def register_product():
         product = Product.query.filter_by(barcode=form.barcode.data).first()
         if product:
             flash("Το προϊόν υπάρχει ήδη", "danger")
-            return redirect(url_for("category.categories"))
+            return redirect(url_for("product.products", view="list"))
 
         image_filename = None
         if form.image.data:
@@ -73,7 +85,7 @@ def register_product():
                 return redirect(url_for("dashboard"))
 
         try:
-            cat_id = request.args.get("cat_id")
+            category = request.form.get("categories")
             print(f"Cat id {cat_id}")
             supplier_id = request.form.get("suppliers")
             product = Product(
@@ -83,13 +95,13 @@ def register_product():
                 price=form.price.data,
                 date_created=datetime.datetime.now(),
                 image=image_filename if image_filename else None,
-                cat_id=cat_id if cat_id else None,
+                cat_id=category if category else None,
                 supplier_id=supplier_id if supplier_id else None,
             )
             db.session.add(product)
             db.session.commit()
             flash("Το προϊόν καταχωρήθηκε επιτυχώς!", "success")
-            return redirect(url_for("category.categories"))
+            return redirect(url_for("product.products", view="list"))
         except Exception as e:
             db.session.rollback()
             flash(f"Σφάλμα κατά την καταχώρηση: {e}", "danger")
