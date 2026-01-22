@@ -109,12 +109,11 @@ h3.fw-bold span.text-primary {
 }
 
 /* ===== EMPTY STATE ===== */
-.text-center.mt-5 h5 {
+.text-center.mt-5 h5.text-muted {
   color: #b0b4bd;
   opacity: 0.9;
   letter-spacing: 0.4px;
 }
-
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
   .main-content {
@@ -162,4 +161,10 @@ h3.fw-bold span.text-primary {
   .table td:last-child {
     border-bottom: none;
   }
+}
+
+.empty-state {
+  color: #b0b4bd;
+  opacity: 0.9;
+  letter-spacing: 0.4px;
 }

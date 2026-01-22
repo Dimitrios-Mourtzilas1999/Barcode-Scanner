@@ -97,6 +97,7 @@ def register_category():
         try:
             db.session.add(category)
             db.session.commit()
+            flash("Η κατηγορία προστέθηκε", "success")
             return redirect(url_for("category.categories"))
         except SQLAlchemyError as e:
             db.session.rollback()

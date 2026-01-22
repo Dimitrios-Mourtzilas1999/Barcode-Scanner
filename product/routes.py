@@ -111,7 +111,7 @@ def register_product():
     return render_template("register_product.html", form=form, cat_id=cat_id)
 
 
-@productbp.route("/edit/<int:barcode>", methods=["GET", "POST"])
+@productbp.route("/edit/<string:barcode>", methods=["GET", "POST"])
 def edit_product(barcode):
     form = ProductEditForm()
     product = None

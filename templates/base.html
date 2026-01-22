@@ -1,23 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{%block title%}{%endblock%}</title>
+  <meta charset="UTF-8">
+  <title>{% block title %}Αποθήκη Προϊόντων{% endblock %}</title>
 
+  <!-- Bootstrap CSS -->
+  <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+  <!-- Your custom CSS -->
+  <link href="{{ url_for('static', filename='css/base.css') }}" rel="stylesheet">
+
+  {% block css %}{% endblock %}
 </head>
-
-{%block css %}
-<link rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}">
-{%endblock %}
-
-{%block js %}
-<script src="{{url_for('static',filename='js/bootstrap.min.js')}}"></script>
-{%endblock%}
-
 <body>
-    {%block content %}
 
-    {%endblock%}
+  <!-- Flash messages (GLOBAL) -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div id="flash-container">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show flash-message">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Page content -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Bootstrap JS -->
+  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+  <!-- Flash handler JS (GLOBAL) -->
+  <script src="{{ url_for('static', filename='js/base.js') }}"></script>
+
+  {% block js %}{% endblock %}
 </body>
 </html>

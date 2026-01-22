@@ -7,6 +7,7 @@ from flask import (
     request,
     flash,
 )
+from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 from .forms import SupplierRegistrationForm, SupplierEditForm
 from extensions import db
@@ -25,10 +26,18 @@ supplierbp = Blueprint(
 
 @supplierbp.route("/", methods=["GET", "POST"])
 def suppliers():
-    suppliers = Supplier.query.order_by(Supplier.name).all()
-    product_count = Supplier.query.join(Product).count()
+    suppliers = (
+        db.session.query(
+            Supplier,
+            func.count(Product.id).label("product_count")
+        )
+        .outerjoin(Product)
+        .group_by(Supplier.id)
+        .order_by(Supplier.name)
+        .all()
+    )
     return render_template(
-        "suppliers_index.html", suppliers=suppliers, product_count=product_count
+        "suppliers_index.html", suppliers=suppliers
     )
 
 
