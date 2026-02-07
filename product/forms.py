@@ -13,10 +13,12 @@ class ProductRegistrationForm(FlaskForm):
     stock = IntegerField("Ποσοτητα", validators=[DataRequired()])
     image = FileField("Αρχείο εικκόνας", validators=[FileAllowed(["jpg", "png"])])
     categories = SelectField(
-        "Κατηγορία", choices=get_categories, validators=[DataRequired()]
+        "Κατηγορία", choices=get_categories,
+        coerce=lambda x: None if x in ("", "None", None) else int(x)
     )
     suppliers = SelectField(
-        "Προμηθευτής", choices=get_suppliers, validators=[DataRequired()]
+        "Προμηθευτής", choices=get_suppliers,
+        coerce=lambda x: None if x in ("", "None", None) else int(x)
     )
     submit = SubmitField("Καταχώρηση προϊόντος")
 

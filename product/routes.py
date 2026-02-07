@@ -87,7 +87,6 @@ def register_product():
         try:
             category = request.form.get("categories")
             print(f"Cat id {cat_id}")
-            supplier_id = request.form.get("suppliers")
             product = Product(
                 barcode=form.barcode.data,
                 desc=form.desc.data,
@@ -96,7 +95,7 @@ def register_product():
                 date_created=datetime.datetime.now(),
                 image=image_filename if image_filename else None,
                 cat_id=category if category else None,
-                supplier_id=supplier_id if supplier_id else None,
+                supplier_id=form.suppliers.data if form.suppliers.data else None,
             )
             db.session.add(product)
             db.session.commit()

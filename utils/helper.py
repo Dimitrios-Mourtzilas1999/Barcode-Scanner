@@ -30,5 +30,7 @@ def get_categories():
 
 
 def get_suppliers():
+    empty_option = [(None, "Επιλέξτε προμηθευτή")]
     suppliers = Supplier.query.all()
-    return [(supplier.id, supplier.name) for supplier in suppliers]
+    suppliers = empty_option + [(supplier.id, supplier.name) for supplier in suppliers]
+    return suppliers

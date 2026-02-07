@@ -11,6 +11,11 @@
 
 {%block content %}
 
+  {%if products|length == 0 %}
+    <div class="text-center mt-5">
+      <h5 class="text-muted">Δεν υπάρχουν προϊόντα.</h5>
+    </div>
+  {%else%}
   <table class="table table-hover table-bordered align-middle products-table">
     <thead class="table-light">
       <tr>
@@ -19,6 +24,7 @@
         <th scope="col" data-sort="barcode">Κωδικός <i class="fa-solid fa-sort"></i></th>
         <th scope="col" data-sort="desc">Περιγραφή <i class="fa-solid fa-sort"></i></th>
         <th scope="col" data-sort="category">Κατηγορία <i class="fa-solid fa-sort"></i></th>
+        <th scope="col" data-sort="supplier">Προμηθευτής <i class="fa-solid fa-sort"></i></th>
         <th scope="col" data-sort="stock">Απόθεμα <i class="fa-solid fa-sort"></i></th>
         <th scope="col" data-sort="price">Τιμή <i class="fa-solid fa-sort"></i></th>
       </tr>
@@ -35,12 +41,14 @@
         </td>
         <td>{{ product.desc }}</td>
         <td>{{ product.category.cat_type if product.category else 'Χωρίς κατηγορία' }}</td>
+        <td>{{ product.supplier.name if product.supplier else 'Χωρίς προμηθευτή' }}</td>
         <td>{{ product.stock }}</td>
         <td>{{ "%.2f"|format(product.price) }} €</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
+  {%endif%}
   {%include 'pagination.html'%}
 
 {%endblock%}
